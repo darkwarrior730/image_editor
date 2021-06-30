@@ -16,6 +16,9 @@
 int WIDTH = 640;
 int HEIGHT = 480;
 
+bool lbutton_down = false;
+bool prevL = false;
+
 void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -39,6 +42,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            lbutton_down = true;
+            prevL = false;
+        } else if (action == GLFW_RELEASE) {
+            lbutton_down = false;
+            prevL = true;
+        }
+    }
 }
 
 int main(int argc, char *argv[])
@@ -77,10 +89,10 @@ int main(int argc, char *argv[])
 
     float vertices[] = {
         // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.75f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.75f, 0.75f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.75f, 1.0f  // top left 
+         1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
     };
     unsigned int indices[] = {  
         0, 1, 3, // first triangle
@@ -130,22 +142,55 @@ int main(int argc, char *argv[])
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_image);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    int i = 0;
+    //int i = 0;
 
-    while(!glfwWindowShouldClose(window)) {
+    double xpos, ypos;
+    float xfract, yfract;
+    glm::vec2 coord;
+
+    int temp;
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwGetCursorPos(window, &xpos, &ypos);
+        ypos = HEIGHT - ypos;
+        xfract = float(xpos/WIDTH);//*2.0f - 1.0f;
+        yfract = float(ypos/HEIGHT);//*2.0f - 1.0f;
+        coord = glm::vec2(xfract, yfract);
+
+        if (glfwGetWindowAttrib(window, GLFW_HOVERED) == false) {
+            lbutton_down = false;
+            prevL = true;
+        }
+
+        std::cout << "x-" << xfract << std::endl;
+        std::cout << "y-" << yfract << std::endl;
+
+        if (lbutton_down == true) {
+            for (int a = width*(1.0f-xfract)-5; a < width*(1.0f-xfract)+5; a++) {
+                for (int b = height*(1.0f-yfract)-5; b < height*(1.0f-yfract)+5; b++) {
+                    std::cout << a << "-" << b << std::endl;
+                    temp = b*width + a;
+                    temp *= bpp;
+                    *(rgb_image + temp) = 0;
+                    *(rgb_image + temp + 1) = 0;
+                    *(rgb_image + temp + 2) = 0;
+                }
+            }
+        }
+
         glClearColor(1.0f, 1.0f, 1.0f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // bind Texture
         glBindTexture(GL_TEXTURE_2D, texture);
 
-        std::cout << "i--" << i << std::endl;
-        std::cout << (int)*(rgb_image+i) << std::endl;
-        *(rgb_image+i) = 0;
-        std::cout << (int)*(rgb_image+i) << std::endl;
-        if(i < width*height*bpp) {
-            i++;
-        }
+        //std::cout << "i--" << i << std::endl;
+        //std::cout << (int)*(rgb_image+i) << std::endl;
+        //*(rgb_image+i) = 0;
+        //std::cout << (int)*(rgb_image+i) << std::endl;
+        //if (i < width*height*bpp) {
+        //    i++;
+        //}
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_image);
         glGenerateMipmap(GL_TEXTURE_2D);
