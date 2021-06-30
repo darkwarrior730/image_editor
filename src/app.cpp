@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         std::cout << "y-" << yfract << std::endl;
 
         if (lbutton_down == true) {
-            for (int a = width*(1.0f-xfract)-5; a < width*(1.0f-xfract)+5; a++) {
+            for (int a = width*(xfract)-5; a < width*(xfract)+5; a++) {
                 for (int b = height*(1.0f-yfract)-5; b < height*(1.0f-yfract)+5; b++) {
                     std::cout << a << "-" << b << std::endl;
                     temp = b*width + a;
