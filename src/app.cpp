@@ -204,6 +204,8 @@ int main(int argc, char *argv[])
         glfwPollEvents();
     }
 
+    stbi_write_jpg("image.jpg", width, height, 3, rgb_image, 50);
+
     stbi_image_free(rgb_image);
 
     glfwDestroyWindow(window);
