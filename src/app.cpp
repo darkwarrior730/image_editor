@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <iostream>
 #include <cstdint>
 
@@ -19,6 +20,9 @@ int HEIGHT = 480;
 bool lbutton_down = false;
 bool prevL = false;
 
+bool press_plus = false;
+bool press_minus = false;
+
 void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -37,6 +41,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
+        if (key == GLFW_KEY_EQUAL && mods == 1) {
+            std::cout << "Pressed +" << std::endl;
+            press_plus = true;
+        }
+        if (key == GLFW_KEY_MINUS && mods == 0) {
+            std::cout << "Pressed -" << std::endl;
+            press_minus = true;
+        }
     }
 }
 
@@ -51,6 +63,73 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             prevL = true;
         }
     }
+}
+
+void handle_zoom (GLFWwindow* window, unsigned int VAO, unsigned int VBO, float vertices[], size_t vs, float& scale)
+{
+    float temp;
+    if (press_plus == true) {
+        press_plus = false;
+        scale *= 2.0f;
+        temp = (1.0f - (1.0f / scale))/2;
+
+        std::cout << scale << " - " << temp << std::endl;
+
+        vertices[6] = 1.0f-temp;
+        vertices[7] = 1.0f-temp;
+        
+        vertices[8+6] = 1.0f-temp;
+        vertices[8+7] = temp;
+        
+        vertices[16+6] = temp;
+        vertices[16+7] = temp;
+
+        vertices[24+6] = temp;
+        vertices[24+7] = 1.0f-temp;
+
+        std::cout << "vertices: " << std::endl;
+        for (int i = 0; i < 32; i++) {
+            std:: cout << vertices[i] << "-";
+        }
+        std::cout << std::endl;
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vs, vertices, GL_DYNAMIC_DRAW);
+    }
+    if (press_minus == true) {
+        press_minus = false;
+        
+        std::cout << scale << " - " << temp << std::endl;
+
+        if (scale == 1.0f) {
+            return;
+        }
+
+        scale /= 2.0f;
+        temp = (1.0f - (1.0f / scale))/2;
+
+        std::cout << scale << " - " << temp << std::endl;
+
+        vertices[6] = 1.0f-temp;
+        vertices[7] = 1.0f-temp;
+        
+        vertices[8+6] = 1.0f-temp;
+        vertices[8+7] = temp;
+        
+        vertices[16+6] = temp;
+        vertices[16+7] = temp;
+
+        vertices[24+6] = temp;
+        vertices[24+7] = 1.0f-temp;
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vs, vertices, GL_DYNAMIC_DRAW);
+    }
+    return;
 }
 
 int main(int argc, char *argv[])
@@ -87,6 +166,8 @@ int main(int argc, char *argv[])
         "../src/vertex/test2.vs",
         "../src/fragment/test2.fs");
 
+    float scale = 1;
+
     float vertices[] = {
         // positions          // colors           // texture coords
          1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
@@ -106,10 +187,10 @@ int main(int argc, char *argv[])
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -125,9 +206,13 @@ int main(int argc, char *argv[])
 
     uint8_t* rgb_image = stbi_load("bg.jpg", &width, &height, &bpp, 3);
 
-    std::cout << width << std::endl;
-    std::cout << height << std::endl;
-    std::cout << bpp << std::endl;
+    //std::cout << width << std::endl;
+    //std::cout << height << std::endl;
+    //std::cout << bpp << std::endl;
+
+    //WIDTH = width;
+    //HEIGHT = height;
+    //glViewport(0, 0, width, height);
 
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -162,18 +247,22 @@ int main(int argc, char *argv[])
             prevL = true;
         }
 
-        std::cout << "x-" << xfract << std::endl;
-        std::cout << "y-" << yfract << std::endl;
+        handle_zoom(window, VAO, VBO, vertices, sizeof(vertices), scale);
 
-        if (lbutton_down == true) {
-            for (int a = width*(xfract)-5; a < width*(xfract)+5; a++) {
-                for (int b = height*(1.0f-yfract)-5; b < height*(1.0f-yfract)+5; b++) {
-                    std::cout << a << "-" << b << std::endl;
-                    temp = b*width + a;
-                    temp *= bpp;
-                    *(rgb_image + temp) = 0;
-                    *(rgb_image + temp + 1) = 0;
-                    *(rgb_image + temp + 2) = 0;
+        //std::cout << "x-" << xfract << std::endl;
+        //std::cout << "y-" << yfract << std::endl;
+
+        if (lbutton_down != prevL) {
+            if (lbutton_down == true) {
+                for (int a = width*(xfract)-5; a < width*(xfract)+5; a++) {
+                    for (int b = height*(1.0f-yfract)-5; b < height*(1.0f-yfract)+5; b++) {
+                        //std::cout << a << "-" << b << std::endl;
+                        temp = b*width + a;
+                        temp *= bpp;
+                        *(rgb_image + temp) = 0;
+                        *(rgb_image + temp + 1) = 0;
+                        *(rgb_image + temp + 2) = 0;
+                    }
                 }
             }
         }
@@ -183,14 +272,6 @@ int main(int argc, char *argv[])
 
         // bind Texture
         glBindTexture(GL_TEXTURE_2D, texture);
-
-        //std::cout << "i--" << i << std::endl;
-        //std::cout << (int)*(rgb_image+i) << std::endl;
-        //*(rgb_image+i) = 0;
-        //std::cout << (int)*(rgb_image+i) << std::endl;
-        //if (i < width*height*bpp) {
-        //    i++;
-        //}
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_image);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -204,7 +285,7 @@ int main(int argc, char *argv[])
         glfwPollEvents();
     }
 
-    stbi_write_jpg("image.jpg", width, height, 3, rgb_image, 50);
+    stbi_write_jpg("image.jpg", width, height, 3, rgb_image, 100);
 
     stbi_image_free(rgb_image);
 
