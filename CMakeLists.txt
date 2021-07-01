@@ -15,7 +15,7 @@ target_include_directories(glad PUBLIC external/include)
 
 include_directories("external/include/glm/")
 
-set(SOURCE_FILES src/app.cpp)
+set(SOURCE_FILES src/app.cpp src/drawing_space.cpp src/image_handler.cpp)
 
 add_executable (image_editor ${SOURCE_FILES})
 

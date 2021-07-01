@@ -1,3 +1,6 @@
+#include "image_handler.hpp"
+#include "drawing_space.hpp"
+
 #include <cstddef>
 #include <iostream>
 #include <cstdint>
@@ -6,11 +9,6 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <ostream>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
 
 #include "shader_s.h"
 
@@ -42,11 +40,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
         if (key == GLFW_KEY_EQUAL && mods == 1) {
-            std::cout << "Pressed +" << std::endl;
             press_plus = true;
         }
         if (key == GLFW_KEY_MINUS && mods == 0) {
-            std::cout << "Pressed -" << std::endl;
             press_minus = true;
         }
     }
@@ -86,12 +82,6 @@ void handle_zoom (GLFWwindow* window, unsigned int VAO, unsigned int VBO, float 
 
         vertices[24+6] = temp;
         vertices[24+7] = 1.0f-temp;
-
-        std::cout << "vertices: " << std::endl;
-        for (int i = 0; i < 32; i++) {
-            std:: cout << vertices[i] << "-";
-        }
-        std::cout << std::endl;
 
         glBindVertexArray(VAO);
 
@@ -162,11 +152,11 @@ int main(int argc, char *argv[])
 
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-    Shader testShader(
+    /*Shader testShader(
         "../src/vertex/test2.vs",
         "../src/fragment/test2.fs");
 
-    float scale = 1;
+    float scale = 1.0f;
 
     float vertices[] = {
         // positions          // colors           // texture coords
@@ -200,9 +190,11 @@ int main(int argc, char *argv[])
     glEnableVertexAttribArray(1);
     // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(2);*/
 
-    int width, height, bpp;
+    drawingSpace ds = drawingSpace();
+
+    /*int width, height, bpp;
 
     uint8_t* rgb_image = stbi_load("bg.jpg", &width, &height, &bpp, 3);
 
@@ -225,7 +217,7 @@ int main(int argc, char *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_image);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_2D);*/
 
     //int i = 0;
 
@@ -247,21 +239,17 @@ int main(int argc, char *argv[])
             prevL = true;
         }
 
-        handle_zoom(window, VAO, VBO, vertices, sizeof(vertices), scale);
-
-        //std::cout << "x-" << xfract << std::endl;
-        //std::cout << "y-" << yfract << std::endl;
+        handle_zoom(window, ds.VAO, ds.VBO, ds.vertices, sizeof(ds.vertices), ds.zoom_scale);
 
         if (lbutton_down != prevL) {
             if (lbutton_down == true) {
-                for (int a = width*(xfract)-5; a < width*(xfract)+5; a++) {
-                    for (int b = height*(1.0f-yfract)-5; b < height*(1.0f-yfract)+5; b++) {
-                        //std::cout << a << "-" << b << std::endl;
-                        temp = b*width + a;
-                        temp *= bpp;
-                        *(rgb_image + temp) = 0;
-                        *(rgb_image + temp + 1) = 0;
-                        *(rgb_image + temp + 2) = 0;
+                for (int a = ds.img.width*(xfract)-5; a < ds.img.width*(xfract)+5; a++) {
+                    for (int b = ds.img.height*(1.0f-yfract)-5; b < ds.img.height*(1.0f-yfract)+5; b++) {
+                        temp = b*ds.img.width + a;
+                        temp *= ds.img.bpp;
+                        *(ds.img.rgb_image + temp) = 0;
+                        *(ds.img.rgb_image + temp + 1) = 0;
+                        *(ds.img.rgb_image + temp + 2) = 0;
                     }
                 }
             }
@@ -271,23 +259,23 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         // bind Texture
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, ds.texture);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_image);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ds.img.width, ds.img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, ds.img.rgb_image);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         // render container
-        testShader.use();
-        glBindVertexArray(VAO);
+        ds.testShader.use();
+        glBindVertexArray(ds.VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    stbi_write_jpg("image.jpg", width, height, 3, rgb_image, 100);
+    ds.img.writePixels();
 
-    stbi_image_free(rgb_image);
+    ds.img.freeImage();
 
     glfwDestroyWindow(window);
     glfwTerminate();
