@@ -4,7 +4,7 @@
 
 class Image {
 public:
-    uint8_t* rgb_image;
+    uint8_t* pixels;
     int width, height, bpp;
     Image();
     void writePixels();

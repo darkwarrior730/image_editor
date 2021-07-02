@@ -1,13 +1,11 @@
 #pragma once
 
-#include "gui_elements.hpp"
-#include "image_handler.hpp"
 #include "shader_s.h"
+#include "image_handler.hpp"
 
-class drawingSpace {
+class GUI_BOX {
 public:
-
-    /*unsigned int VBO, VAO, EBO;
+    unsigned int VBO, VAO, EBO;
     float vertices[32] = {
         // positions          // colors           // texture coords
          1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
@@ -18,13 +16,23 @@ public:
     unsigned int indices[6] = {  
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
-    };*/
-    GUI_TEXTURED_BOX gui = GUI_TEXTURED_BOX();
+    };
+    Shader shader = Shader("../src/vertex/test2.vs", "../src/fragment/test2.fs");
 
-    float zoom_scale = 1.0f;
-    /*Shader testShader = Shader("../src/vertex/test2.vs", "../src/fragment/test2.fs");*/
-    /*unsigned int texture;
-    Image img = Image();*/
+    GUI_BOX();
 
-    drawingSpace();
+    void draw();
+
+    void setShader(const char* vs, const char* fs);
+};
+
+class GUI_TEXTURED_BOX {
+public:
+    GUI_BOX box = GUI_BOX();
+    unsigned int texture;
+    Image img = Image();
+
+    GUI_TEXTURED_BOX();
+
+    void draw();
 };

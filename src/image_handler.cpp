@@ -6,13 +6,13 @@
 #include "stb_image_write.h"
 
 Image::Image () {
-    rgb_image = stbi_load("bg.jpg", &width, &height, &bpp, 3);
+    pixels = stbi_load("bg.jpg", &width, &height, &bpp, 3);
 }
 
 void Image::writePixels () {
-    stbi_write_jpg("image.jpg", width, height, 3, rgb_image, 100);
+    stbi_write_jpg("image.jpg", width, height, 3, pixels, 100);
 }
 
 void Image::freeImage () {
-    stbi_image_free(rgb_image);
+    stbi_image_free(pixels);
 }

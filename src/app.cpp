@@ -69,7 +69,7 @@ void handle_zoom (GLFWwindow* window, unsigned int VAO, unsigned int VBO, float 
         scale *= 2.0f;
         temp = (1.0f - (1.0f / scale))/2;
 
-        std::cout << scale << " - " << temp << std::endl;
+        //std::cout << scale << " - " << temp << std::endl;
 
         vertices[6] = 1.0f-temp;
         vertices[7] = 1.0f-temp;
@@ -91,7 +91,7 @@ void handle_zoom (GLFWwindow* window, unsigned int VAO, unsigned int VBO, float 
     if (press_minus == true) {
         press_minus = false;
         
-        std::cout << scale << " - " << temp << std::endl;
+        //std::cout << scale << " - " << temp << std::endl;
 
         if (scale == 1.0f) {
             return;
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 
     /*int width, height, bpp;
 
-    uint8_t* rgb_image = stbi_load("bg.jpg", &width, &height, &bpp, 3);
+    uint8_t* pixels = stbi_load("bg.jpg", &width, &height, &bpp, 3);
 
     //std::cout << width << std::endl;
     //std::cout << height << std::endl;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb_image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
     glGenerateMipmap(GL_TEXTURE_2D);*/
 
     //int i = 0;
@@ -224,6 +224,8 @@ int main(int argc, char *argv[])
     double xpos, ypos;
     float xfract, yfract;
     glm::vec2 coord;
+    float c_xfract, c_yfract;
+    glm::vec2 c_coord;
 
     int temp;
 
@@ -233,23 +235,26 @@ int main(int argc, char *argv[])
         xfract = float(xpos/WIDTH);//*2.0f - 1.0f;
         yfract = float(ypos/HEIGHT);//*2.0f - 1.0f;
         coord = glm::vec2(xfract, yfract);
+        c_xfract = xfract*2.0f - 1.0f;
+        c_yfract = yfract*2.0f - 1.0f;
+        c_coord = glm::vec2(c_xfract, c_yfract);
 
         if (glfwGetWindowAttrib(window, GLFW_HOVERED) == false) {
             lbutton_down = false;
             prevL = true;
         }
 
-        handle_zoom(window, ds.VAO, ds.VBO, ds.vertices, sizeof(ds.vertices), ds.zoom_scale);
+        handle_zoom(window, ds.gui.box.VAO, ds.gui.box.VBO, ds.gui.box.vertices, sizeof(ds.gui.box.vertices), ds.zoom_scale);
 
         if (lbutton_down != prevL) {
             if (lbutton_down == true) {
-                for (int a = ds.img.width*(xfract)-5; a < ds.img.width*(xfract)+5; a++) {
-                    for (int b = ds.img.height*(1.0f-yfract)-5; b < ds.img.height*(1.0f-yfract)+5; b++) {
-                        temp = b*ds.img.width + a;
-                        temp *= ds.img.bpp;
-                        *(ds.img.rgb_image + temp) = 0;
-                        *(ds.img.rgb_image + temp + 1) = 0;
-                        *(ds.img.rgb_image + temp + 2) = 0;
+                for (int a = ds.gui.img.width*(xfract)-5; a < ds.gui.img.width*(xfract)+5; a++) {
+                    for (int b = ds.gui.img.height*(1.0f-yfract)-5; b < ds.gui.img.height*(1.0f-yfract)+5; b++) {
+                        temp = b*ds.gui.img.width + a;
+                        temp *= ds.gui.img.bpp;
+                        *(ds.gui.img.pixels + temp) = 0;
+                        *(ds.gui.img.pixels + temp + 1) = 0;
+                        *(ds.gui.img.pixels + temp + 2) = 0;
                     }
                 }
             }
@@ -259,23 +264,25 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         // bind Texture
-        glBindTexture(GL_TEXTURE_2D, ds.texture);
+        /*glBindTexture(GL_TEXTURE_2D, ds.texture);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ds.img.width, ds.img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, ds.img.rgb_image);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ds.img.width, ds.img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, ds.img.pixels);
+        glGenerateMipmap(GL_TEXTURE_2D);*/
 
         // render container
-        ds.testShader.use();
+        /*ds.testShader.use();
         glBindVertexArray(ds.VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
+
+        ds.gui.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    ds.img.writePixels();
+    ds.gui.img.writePixels();
 
-    ds.img.freeImage();
+    ds.gui.img.freeImage();
 
     glfwDestroyWindow(window);
     glfwTerminate();

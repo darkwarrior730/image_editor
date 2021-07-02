@@ -1,14 +1,12 @@
-#include "image_handler.hpp"
+#include "gui_elements.hpp"
 #include "shader_s.h"
-#include "drawing_space.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-drawingSpace::drawingSpace()
-{
-    /*glGenVertexArrays(1, &VAO);
+GUI_BOX::GUI_BOX () {
+    glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
@@ -28,9 +26,23 @@ drawingSpace::drawingSpace()
     glEnableVertexAttribArray(1);
     // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);*/
+    glEnableVertexAttribArray(2);
+}
 
-    /*glGenTextures(1, &texture);
+void GUI_BOX::draw () {
+    shader.use();
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void GUI_BOX::setShader (const char* vs, const char* fs) {
+    glDeleteProgram(shader.ID);
+    shader = Shader(vs, fs);
+}
+
+
+GUI_TEXTURED_BOX::GUI_TEXTURED_BOX () {
+    glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -40,5 +52,14 @@ drawingSpace::drawingSpace()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.width, img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, img.pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);*/
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void GUI_TEXTURED_BOX::draw () {
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.width, img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, img.pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    box.draw();
 }
