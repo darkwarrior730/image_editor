@@ -229,7 +229,14 @@ int main(int argc, char *argv[])
 
     int temp;
 
+    float prevtime = glfwGetTime();
+    float time = glfwGetTime();
+
     while (!glfwWindowShouldClose(window)) {
+        time = glfwGetTime();
+        //std::cout << 1.0f/(time-prevtime) << std::endl;
+        prevtime = time;
+
         glfwGetCursorPos(window, &xpos, &ypos);
         ypos = HEIGHT - ypos;
         xfract = float(xpos/WIDTH);//*2.0f - 1.0f;
