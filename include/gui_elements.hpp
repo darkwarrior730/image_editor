@@ -12,10 +12,10 @@
 
 class GUI_BOX;
 
-/*typedef struct anchorSide{
+typedef struct anchorSide{
     std::vector<GUI_BOX*> pntrs;
     std::vector<int> sides;
-} anchorSide;*/
+} anchorSide;
 
 class GUI_BOX {
 public:
@@ -51,27 +51,27 @@ public:
     GUI_BOX* anchorTop;
     int nextTop;
 
-    /*anchorSide topSide;*/
+    anchorSide topSide;
 
     bool ancRight = false;
     GUI_BOX* anchorRight;
     int nextRight;
 
-    /*anchorSide rightSide;*/
+    anchorSide rightSide;
 
     bool ancBottom = false;
     GUI_BOX* anchorBottom;
     int nextBottom;
 
-    /*anchorSide bottomSide;*/
+    anchorSide bottomSide;
 
     bool ancLeft = false;
     GUI_BOX* anchorLeft;
     int nextLeft;
 
-    /*anchorSide leftSide;*/
+    anchorSide leftSide;
 
-    /*anchorSide* anchors[4] = {&topSide, &rightSide, &bottomSide, &leftSide};*/
+    anchorSide* anchors[4] = {&topSide, &rightSide, &bottomSide, &leftSide};
 
     GUI_BOX();
 
@@ -92,9 +92,11 @@ public:
 
     void anchorEdge(int e1, GUI_BOX* b, int e2);
 
-    void checkAnchors(int e, float val);
+    //void checkAnchors(int e, float val);
 
-    /*bool checkFixed(int edge);*/
+    bool checkFixed(int edge);
+
+    void updateAnchors(int e, float n);
 };
 
 class GUI_TEXTURED_BOX {

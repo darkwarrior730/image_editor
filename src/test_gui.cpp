@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     
     box3.updateVertexBuffer();
 
-    GUI_BOX box4 = GUI_BOX();
+    /*GUI_BOX box4 = GUI_BOX();
 
     box4.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
 
@@ -156,16 +156,16 @@ int main(int argc, char *argv[])
     box4.fixedX = true;
     box4.fixedBottom = true;
     
-    box4.updateVertexBuffer();
+    box4.updateVertexBuffer();*/
 
-    //box1.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
-    //box2.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
-    //box1.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
-
-    box4.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
-    box1.anchorEdge(GUI_RIGHT, &box4, GUI_RIGHT);
-    box2.anchorEdge(GUI_LEFT, &box4, GUI_LEFT);
+    box1.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
+    box2.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
     box1.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
+
+    //box4.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
+    //box1.anchorEdge(GUI_RIGHT, &box4, GUI_RIGHT);
+    //box2.anchorEdge(GUI_LEFT, &box4, GUI_LEFT);
+    //box1.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
 
     GUI_BOX* bb;
     int be;
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
         //box2.draw();
         //box3.draw();
 
-        box4.draw();
+        //box4.draw();
         box3.draw();
         box2.draw();
         box1.draw();

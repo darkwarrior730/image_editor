@@ -1,6 +1,8 @@
 #include "gui_elements.hpp"
 #include "shader_s.h"
 
+#include <bits/c++config.h>
+#include <functional>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -73,63 +75,130 @@ void GUI_BOX::updateVertexBuffer () {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 }
 
-/*bool GUI_BOX::checkFixed(int edge) {
+bool GUI_BOX::checkFixed(int edge) {
     typedef struct pair {
         GUI_BOX* box;
         int edge;
+
+        bool operator==(pair const p) const {
+            if ((box == p.box) && (edge == p.edge)) {
+                return true;
+            }
+            return false;
+        }
     } pair;
+
+    struct hash_pair {
+        std::size_t operator()(const pair p) const {
+            return std::hash<long>()((long)p.box * (long)p.edge);
+        }
+    };
 
     std::vector<pair*> toVisit;
     toVisit.push_back(new pair{this, edge});
-    std::unordered_set<pair*> visited;
+    std::unordered_set<pair, hash_pair> visited;
     pair* cur;
-    int a = 0;
+    //int a = 0;
     while (!toVisit.empty()) {
         cur = toVisit.back();
         toVisit.pop_back();
-        std::cout << a << std::endl;
-        a++;
-        std::cout << cur << std::endl;
-        if (visited.count(cur) != 0) {
-            std::cout << "z" << std::endl;
+        //std::cout << a << std::endl;
+        //a++;
+        //std::cout << cur->box << "#" << cur->edge << std::endl;
+        //std::cout << ":::" << visited.count(*cur) << std::endl;
+        //std::cout << cur << std::endl;
+        if (visited.count(*cur) != 0) {
+            //std::cout << "z" << std::endl;
             continue;
         }
-        visited.insert(cur);
+        visited.insert(*cur);
         if (cur->box->fixedSize == true) {
-            std::cout << "a" << std::endl;
+            //std::cout << "a" << std::endl;
             return true;
-        } else if (edge%2 == 0) {
+        } else if (cur->edge%2 == 0) {
             if (cur->box->fixedY == true) {
-                std::cout << "b" << std::endl;
+                //std::cout << "b" << std::endl;
                 return true;
-            } else if ((edge == 0) && (cur->box->fixedTop)) {
-                std::cout << "c" << std::endl;
+            } else if ((cur->edge == 0) && (cur->box->fixedTop)) {
+                //std::cout << "c" << std::endl;
                 return true;
-            } else if ((edge == 2) && (cur->box->fixedBottom)) {
-                std::cout << "d" << std::endl;
+            } else if ((cur->edge == 2) && (cur->box->fixedBottom)) {
+                //std::cout << "d" << std::endl;
                 return true;
             }
         } else {
             if (cur->box->fixedX == true) {
-                std::cout << "e" << std::endl;
+                //std::cout << "e" << std::endl;
                 return true;
-            } else if ((edge == 1) && (cur->box->fixedRight)) {
-                std::cout << "f" << std::endl;
+            } else if ((cur->edge == 1) && (cur->box->fixedRight)) {
+                //std::cout << "f" << std::endl;
                 return true;
-            } else if ((edge == 3) && (cur->box->fixedLeft)) {
-                std::cout << "g" << std::endl;
+            } else if ((cur->edge == 3) && (cur->box->fixedLeft)) {
+                //std::cout << "g" << std::endl;
                 return true;
             }
         }
         for (int i = 0; i < cur->box->anchors[cur->edge]->pntrs.size(); i++) {
             toVisit.push_back(new pair{cur->box->anchors[cur->edge]->pntrs[i], cur->box->anchors[cur->edge]->sides[i]});
+            //std::cout << "--" << cur->box->anchors[cur->edge]->pntrs[i] << std::endl;
+            //std::cout << "--" << cur->box->anchors[cur->edge]->sides[i] << std::endl;
         }
     }
     return false;
-}*/
+}
+
+void GUI_BOX::updateAnchors(int e, float n) {
+    typedef struct pair {
+        GUI_BOX* box;
+        int edge;
+
+        bool operator==(pair const p) const {
+            if ((box == p.box) && (edge == p.edge)) {
+                return true;
+            }
+            return false;
+        }
+    } pair;
+
+    struct hash_pair {
+        std::size_t operator()(const pair p) const {
+            return std::hash<long>()((long)p.box * (long)p.edge);
+        }
+    };
+
+    std::vector<pair*> toVisit;
+    toVisit.push_back(new pair{this, e});
+    std::unordered_set<pair, hash_pair> visited;
+    pair* cur;
+    while (!toVisit.empty()) {
+        cur = toVisit.back();
+        toVisit.pop_back();
+        if (visited.count(*cur) != 0) {
+            continue;
+        }
+        visited.insert(*cur);
+        if (cur->edge == GUI_TOP) {
+            cur->box->vertices[1] = n;
+            cur->box->vertices[25] = n;
+        } else if (cur->edge == GUI_RIGHT) {
+            cur->box->vertices[0] = n;
+            cur->box->vertices[8] = n;
+        } else if (cur->edge == GUI_BOTTOM) {
+            cur->box->vertices[9] = n;
+            cur->box->vertices[17] = n;
+        } else if (cur->edge == GUI_LEFT) {
+            cur->box->vertices[16] = n;
+            cur->box->vertices[24] = n;
+        }
+        for (int i = 0; i < cur->box->anchors[cur->edge]->pntrs.size(); i++) {
+            toVisit.push_back(new pair{cur->box->anchors[cur->edge]->pntrs[i], cur->box->anchors[cur->edge]->sides[i]});
+        }
+    }
+
+}
 
 void GUI_BOX::setEdge (int e, float n) {
-    if (fixedSize == true) {
+    /*if (fixedSize == true) {
         return;
     }
     if ((fixedX == true) && (e%2 == 1)) {
@@ -149,12 +218,12 @@ void GUI_BOX::setEdge (int e, float n) {
     }
     if ((fixedLeft == true) && (e == 3)) {
         return;
-    }
-    /*if (checkFixed(e) == true) {
-        return;
     }*/
+    if (checkFixed(e) == true) {
+        return;
+    }
 
-    if (e == GUI_TOP) {
+    /*if (e == GUI_TOP) {
         vertices[1] = n;
         vertices[25] = n;
     } else if (e == GUI_RIGHT) {
@@ -167,16 +236,11 @@ void GUI_BOX::setEdge (int e, float n) {
         vertices[16] = n;
         vertices[24] = n;
     }
-    checkAnchors(e, n);
+    checkAnchors(e, n);*/
+    updateAnchors(e, n);
 }
 
-/*
-pass it a list of checked objects by pointer
-run for all connected objects
-change all connected objects' relevant edge
-*/
-
-void GUI_BOX::checkAnchors (int e, float val) {
+/*void GUI_BOX::checkAnchors (int e, float val) {
     if (e == 0) {
         if (ancTop != true) {
             return;
@@ -295,7 +359,7 @@ void GUI_BOX::checkAnchors (int e, float val) {
             return;
         }
     }
-}
+}*/
 
 void GUI_BOX::setFillColor (float r, float g, float b) {
     setVertexColor(0, r, g, b);
@@ -324,10 +388,10 @@ float GUI_BOX::getEdge (int e) {
 }
 
 void GUI_BOX::anchorEdge (int e1, GUI_BOX *b, int e2) {
-    /*anchors[e1]->pntrs.push_back(b);
+    anchors[e1]->pntrs.push_back(b);
     anchors[e1]->sides.push_back(e2);
     b->anchors[e2]->pntrs.push_back(this);
-    b->anchors[e2]->sides.push_back(e1);*/
+    b->anchors[e2]->sides.push_back(e1);
 
     if (e1 == GUI_TOP) {
         ancTop = true;
