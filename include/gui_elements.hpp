@@ -47,37 +47,21 @@ public:
     bool fixedBottom = false;
     bool fixedLeft = false;
 
-    bool ancTop = false;
-    GUI_BOX* anchorTop;
-    int nextTop;
-
     anchorSide topSide;
-
-    bool ancRight = false;
-    GUI_BOX* anchorRight;
-    int nextRight;
 
     anchorSide rightSide;
 
-    bool ancBottom = false;
-    GUI_BOX* anchorBottom;
-    int nextBottom;
-
     anchorSide bottomSide;
-
-    bool ancLeft = false;
-    GUI_BOX* anchorLeft;
-    int nextLeft;
 
     anchorSide leftSide;
 
-    anchorSide* anchors[4] = {&topSide, &rightSide, &bottomSide, &leftSide};
+    anchorSide *anchors[4] = {&topSide, &rightSide, &bottomSide, &leftSide};
 
     GUI_BOX();
 
     void draw();
 
-    void setShader(const char* vs, const char* fs);
+    void setShader(const char *vs, const char *fs);
 
     void setVertexPos(int vert, float x, float y, float z);
     void setVertexColor(int vert, float r, float g, float b);
@@ -90,9 +74,7 @@ public:
 
     void setFillColor(float r, float g, float b);
 
-    void anchorEdge(int e1, GUI_BOX* b, int e2);
-
-    //void checkAnchors(int e, float val);
+    void anchorEdge(int e1, GUI_BOX *b, int e2);
 
     bool checkFixed(int edge);
 

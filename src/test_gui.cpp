@@ -1,7 +1,6 @@
 #include "gui_elements.hpp"
 #include "image_handler.hpp"
 
-//#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -21,19 +20,19 @@ int HEIGHT = 480;
 bool lbutton_down = false;
 bool prevL = false;
 
-void error_callback(int error, const char* description)
+void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     WIDTH = width;
     HEIGHT = height;
     glViewport(0, 0, width, height);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_ESCAPE) {
@@ -42,7 +41,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
@@ -63,7 +62,7 @@ int main(int argc, char *argv[])
 
     glfwSetErrorCallback(error_callback);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "My Title", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "My Title", NULL, NULL);
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -142,32 +141,11 @@ int main(int argc, char *argv[])
     
     box3.updateVertexBuffer();
 
-    /*GUI_BOX box4 = GUI_BOX();
-
-    box4.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
-
-    box4.setEdge(GUI_TOP, 0.9f);
-    box4.setEdge(GUI_BOTTOM, -1.0f);
-    box4.setEdge(GUI_RIGHT, 1.0f);
-    box4.setEdge(GUI_LEFT, -1.0f);
-
-    box4.setFillColor(1.0f, 1.0f, 1.0f);
-
-    box4.fixedX = true;
-    box4.fixedBottom = true;
-    
-    box4.updateVertexBuffer();*/
-
     box1.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
     box2.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
     box1.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
 
-    //box4.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
-    //box1.anchorEdge(GUI_RIGHT, &box4, GUI_RIGHT);
-    //box2.anchorEdge(GUI_LEFT, &box4, GUI_LEFT);
-    //box1.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
-
-    GUI_BOX* bb;
+    GUI_BOX *bb;
     int be;
 
     int temp1, temp2;
@@ -287,11 +265,6 @@ int main(int argc, char *argv[])
         glClearColor(1.0f, 1.0f, 1.0f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        //box1.draw();
-        //box2.draw();
-        //box3.draw();
-
-        //box4.draw();
         box3.draw();
         box2.draw();
         box1.draw();

@@ -21,19 +21,19 @@ bool prevL = false;
 bool press_plus = false;
 bool press_minus = false;
 
-void error_callback(int error, const char* description)
+void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     WIDTH = width;
     HEIGHT = height;
     glViewport(0, 0, width, height);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_ESCAPE) {
@@ -48,7 +48,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
@@ -61,7 +61,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
-void handle_zoom (GLFWwindow* window, unsigned int VAO, unsigned int VBO, float vertices[], size_t vs, float& scale)
+void handle_zoom (GLFWwindow *window, unsigned int VAO, unsigned int VBO, float vertices[], size_t vs, float& scale)
 {
     float temp;
     if (press_plus == true) {
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
     glfwSetErrorCallback(error_callback);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "My Title", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "My Title", NULL, NULL);
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
