@@ -19,7 +19,7 @@ public:
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };*/
-    GUI_TEXTURED_BOX gui = GUI_TEXTURED_BOX();
+    GUI_TEXTURED_BOX gui = GUI_TEXTURED_BOX("bg.jpg");
 
     float zoom_scale = 1.0f;
     /*Shader testShader = Shader("../src/vertex/test2.vs", "../src/fragment/test2.fs");*/

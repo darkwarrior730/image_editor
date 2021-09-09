@@ -255,13 +255,13 @@ int main(int argc, char *argv[])
 
         if (lbutton_down != prevL) {
             if (lbutton_down == true) {
-                for (int a = ds.gui.img.width*(xfract)-5; a < ds.gui.img.width*(xfract)+5; a++) {
-                    for (int b = ds.gui.img.height*(1.0f-yfract)-5; b < ds.gui.img.height*(1.0f-yfract)+5; b++) {
-                        temp = b*ds.gui.img.width + a;
-                        temp *= ds.gui.img.bpp;
-                        *(ds.gui.img.pixels + temp) = 0;
-                        *(ds.gui.img.pixels + temp + 1) = 0;
-                        *(ds.gui.img.pixels + temp + 2) = 0;
+                for (int a = ds.gui.img->width*(xfract)-5; a < ds.gui.img->width*(xfract)+5; a++) {
+                    for (int b = ds.gui.img->height*(1.0f-yfract)-5; b < ds.gui.img->height*(1.0f-yfract)+5; b++) {
+                        temp = b*ds.gui.img->width + a;
+                        temp *= ds.gui.img->bpp;
+                        *(ds.gui.img->pixels + temp) = 0;
+                        *(ds.gui.img->pixels + temp + 1) = 0;
+                        *(ds.gui.img->pixels + temp + 2) = 0;
                     }
                 }
             }
@@ -287,9 +287,9 @@ int main(int argc, char *argv[])
         glfwPollEvents();
     }
 
-    ds.gui.img.writePixels();
+    ds.gui.img->writePixels();
 
-    ds.gui.img.freeImage();
+    ds.gui.img->freeImage();
 
     glfwDestroyWindow(window);
     glfwTerminate();

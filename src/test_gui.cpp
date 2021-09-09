@@ -20,6 +20,10 @@ int HEIGHT = 480;
 bool lbutton_down = false;
 bool prevL = false;
 
+bool hidden = false;
+bool switchHide = false;
+float preHide = 0.9f;
+
 void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -38,7 +42,11 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
+        if (mods == 2 && key == GLFW_KEY_H) {
+            switchHide = true;
+        }
     }
+    //std::cout << mods << std::endl;
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
@@ -93,25 +101,27 @@ int main(int argc, char *argv[])
     float c_xfract, c_yfract;
     glm::vec2 c_coord;
 
-    GUI_BOX box1 = GUI_BOX();
+    //GUI_BOX box1 = GUI_BOX();
 
-    box1.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
+    //box1.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
 
-    box1.setEdge(GUI_TOP, 0.9f);
-    box1.setEdge(GUI_BOTTOM, -1.0f);
-    box1.setEdge(GUI_RIGHT, 1.0f);
-    box1.setEdge(GUI_LEFT, -0.8f);
+    GUI_TEXTURED_BOX box1 = GUI_TEXTURED_BOX("pencil.jpg");//"bg.jpg");
 
-    box1.setFillColor(1.0f, 0.0f, 0.0f);
+    box1.box.setEdge(GUI_TOP, 0.9f);
+    box1.box.setEdge(GUI_BOTTOM, -1.0f);
+    box1.box.setEdge(GUI_RIGHT, 1.0f);
+    box1.box.setEdge(GUI_LEFT, -0.8f);
 
-    box1.fixedRight = true;
-    box1.fixedBottom = true;
+    //box1.setFillColor(1.0f, 0.0f, 0.0f);
+
+    box1.box.fixedRight = true;
+    box1.box.fixedBottom = true;
     
-    box1.updateVertexBuffer();
+    box1.box.updateVertexBuffer();
 
     GUI_BOX box2 = GUI_BOX();
 
-    box2.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
+    //box2.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
 
     box2.setEdge(GUI_TOP, 0.9f);
     box2.setEdge(GUI_BOTTOM, -1.0f);
@@ -127,7 +137,7 @@ int main(int argc, char *argv[])
 
     GUI_BOX box3 = GUI_BOX();
 
-    box3.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
+    //box3.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
 
     box3.setEdge(GUI_TOP, 1.0f);
     box3.setEdge(GUI_BOTTOM, 0.9f);
@@ -141,9 +151,40 @@ int main(int argc, char *argv[])
     
     box3.updateVertexBuffer();
 
-    box1.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
+    GUI_TEXTURED_BOX box4 = GUI_TEXTURED_BOX("pencil.jpg");
+
+    box4.box.setEdge(GUI_TOP, 0.05f);
+    box4.box.setEdge(GUI_BOTTOM, -0.05f);
+    box4.box.setEdge(GUI_RIGHT, 0.05f);
+    box4.box.setEdge(GUI_LEFT, -0.05f);
+    
+    box4.box.updateVertexBuffer();
+
+    GUI_TEXTURED_BOX box5 = GUI_TEXTURED_BOX("pencil.jpg");
+
+    box5.box.setEdge(GUI_TOP, 0.05f);
+    box5.box.setEdge(GUI_BOTTOM, -0.05f);
+    box5.box.setEdge(GUI_RIGHT, 0.05f);
+    box5.box.setEdge(GUI_LEFT, -0.05f);
+    
+    box5.box.updateVertexBuffer();
+
+    GUI_TEXTURED_BOX box6 = GUI_TEXTURED_BOX("pencil.jpg");
+
+    box6.box.setEdge(GUI_TOP, 0.05f);
+    box6.box.setEdge(GUI_BOTTOM, -0.05f);
+    box6.box.setEdge(GUI_RIGHT, 0.05f);
+    box6.box.setEdge(GUI_LEFT, -0.05f);
+    
+    box6.box.updateVertexBuffer();
+
+    box1.box.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
     box2.anchorEdge(GUI_TOP, &box3, GUI_BOTTOM);
-    box1.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
+    box1.box.anchorEdge(GUI_LEFT, &box2, GUI_RIGHT);
+
+    box4.box.addRel(&box2, 0.2f, 0.8f);
+    box5.box.addRel(&box2, 0.7f, 0.8f);
+    box6.box.addRel(&box2, 0.2f, 0.7f);
 
     GUI_BOX *bb;
     int be;
@@ -168,6 +209,18 @@ int main(int argc, char *argv[])
             prevL = true;
         }
 
+        if (switchHide == true) {
+            switchHide = false;
+            if (hidden == false) {
+                preHide = box3.getEdge(GUI_BOTTOM);
+                box3.setEdge(GUI_BOTTOM, 1.0f);
+                hidden = true;
+            } else {
+                box3.setEdge(GUI_BOTTOM, preHide);
+                hidden = false;
+            }
+        }
+
         if (lbutton_down == true) {
             //std::cout << "l down" << std::endl;
 
@@ -180,11 +233,11 @@ int main(int argc, char *argv[])
                     temp2 = 3;
                 }
                 if (i%2 == 0) {
-                    if (std::abs(box1.getEdge(i) - c_yfract) < 0.05f) {
+                    if (std::abs(box1.box.getEdge(i) - c_yfract) < 0.05f) {
                         //std::cout << "..." << (i+1)%4 << "==" << (i-1)%4 << std::endl;
-                        if (fmin(box1.getEdge(temp1), box1.getEdge(temp2)) < c_xfract) {
-                            if (fmax(box1.getEdge(temp1), box1.getEdge(temp2)) > c_xfract) {
-                                bb = &box1;
+                        if (fmin(box1.box.getEdge(temp1), box1.box.getEdge(temp2)) < c_xfract) {
+                            if (fmax(box1.box.getEdge(temp1), box1.box.getEdge(temp2)) > c_xfract) {
+                                bb = &box1.box;
                                 be = i;
                                 //std::cout << "box1 - " << i << std::endl; 
                                 //std::cout << c_xfract << " - " << c_yfract << std::endl;
@@ -216,10 +269,10 @@ int main(int argc, char *argv[])
                         }
                     }
                 } else {
-                    if (std::abs(box1.getEdge(i) - c_xfract) < 0.05f) {
-                        if (fmin(box1.getEdge(temp1), box1.getEdge(temp2)) < c_yfract) {
-                            if (fmax(box1.getEdge(temp1), box1.getEdge(temp2)) > c_yfract) {
-                                bb = &box1;
+                    if (std::abs(box1.box.getEdge(i) - c_xfract) < 0.05f) {
+                        if (fmin(box1.box.getEdge(temp1), box1.box.getEdge(temp2)) < c_yfract) {
+                            if (fmax(box1.box.getEdge(temp1), box1.box.getEdge(temp2)) > c_yfract) {
+                                bb = &box1.box;
                                 be = i;
                                 //std::cout << "box1 - " << i << std::endl;
                                 break;
@@ -268,6 +321,10 @@ int main(int argc, char *argv[])
         box3.draw();
         box2.draw();
         box1.draw();
+
+        box4.draw();
+        box5.draw();
+        box6.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -17,6 +17,17 @@ typedef struct anchorSide{
     std::vector<int> sides;
 } anchorSide;
 
+typedef struct relPos{
+    GUI_BOX *box;
+    float relX;
+    float relY;
+} relPos;
+
+/*
+in containing box when you change size size call updateRel method of all dependent boxes
+updateRel updates the boxes position with respect to the containing boxes position and size
+*/
+
 class GUI_BOX {
 public:
     unsigned int VBO, VAO, EBO;
@@ -57,6 +68,9 @@ public:
 
     anchorSide *anchors[4] = {&topSide, &rightSide, &bottomSide, &leftSide};
 
+    std::vector<relPos*> relDependent;
+    relPos relDependence;
+
     GUI_BOX();
 
     void draw();
@@ -72,6 +86,9 @@ public:
     void setEdge(int e, float n);
     float getEdge(int e);
 
+    float getWidth();
+    float getHeight();
+
     void setFillColor(float r, float g, float b);
 
     void anchorEdge(int e1, GUI_BOX *b, int e2);
@@ -79,15 +96,19 @@ public:
     bool checkFixed(int edge);
 
     void updateAnchors(int e, float n);
+
+    void updateRel();
+
+    void addRel(GUI_BOX *b, float x, float y);
 };
 
 class GUI_TEXTURED_BOX {
 public:
     GUI_BOX box = GUI_BOX();
     unsigned int texture;
-    Image img = Image();
+    Image *img;// = Image();
 
-    GUI_TEXTURED_BOX();
+    GUI_TEXTURED_BOX(const char *pic);
 
     void draw();
 };

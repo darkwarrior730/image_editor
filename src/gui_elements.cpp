@@ -32,6 +32,8 @@ GUI_BOX::GUI_BOX () {
     // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
 }
 
 void GUI_BOX::draw () {
@@ -175,6 +177,7 @@ void GUI_BOX::updateAnchors(int e, float n) {
             cur->box->vertices[16] = n;
             cur->box->vertices[24] = n;
         }
+        cur->box->updateRel();
         for (int i = 0; i < cur->box->anchors[cur->edge]->pntrs.size(); i++) {
             toVisit.push_back(new pair{cur->box->anchors[cur->edge]->pntrs[i], cur->box->anchors[cur->edge]->sides[i]});
         }
@@ -187,7 +190,22 @@ void GUI_BOX::setEdge (int e, float n) {
         return;
     }
 
+    /*if (e == GUI_TOP) {
+        vertices[1] = n;
+        vertices[25] = n;
+    } else if (e == GUI_RIGHT) {
+        vertices[0] = n;
+        vertices[8] = n;
+    } else if (e == GUI_BOTTOM) {
+        vertices[9] = n;
+        vertices[17] = n;
+    } else if (e == GUI_LEFT) {
+        vertices[16] = n;
+        vertices[24] = n;
+    }*/
+    
     updateAnchors(e, n);
+    updateRel();
 }
 
 void GUI_BOX::setFillColor (float r, float g, float b) {
@@ -210,6 +228,14 @@ float GUI_BOX::getEdge (int e) {
     return 0.0f;
 }
 
+float GUI_BOX::getWidth () {
+    return getEdge(GUI_RIGHT) - getEdge(GUI_LEFT);
+}
+
+float GUI_BOX::getHeight () {
+    return getEdge(GUI_TOP) - getEdge(GUI_BOTTOM);
+}
+
 void GUI_BOX::anchorEdge (int e1, GUI_BOX *b, int e2) {
     anchors[e1]->pntrs.push_back(b);
     anchors[e1]->sides.push_back(e2);
@@ -217,26 +243,67 @@ void GUI_BOX::anchorEdge (int e1, GUI_BOX *b, int e2) {
     b->anchors[e2]->sides.push_back(e1);
 }
 
+void GUI_BOX::updateRel () {
+    for (std::vector<relPos*>::iterator it = relDependent.begin(); it != relDependent.end(); ++it) {
+        // move centre of each relation to its new position
+        // find actual coords of rel pos
+        float hoffset = getHeight() * (*it)->relY;
+        float woffset = getWidth() * (*it)->relX;
+
+        float tempx = getEdge(GUI_LEFT) + woffset;
+        float tempy = getEdge(GUI_BOTTOM) + hoffset;
+        
+        // offset from centre of object to correct corner
+        float oox = (*it)->box->getWidth() / 2.0f;
+        float ooy = (*it)->box->getHeight() / 2.0f;
+
+        float actx = tempx - oox;
+        float acty = tempy - ooy;
+
+        // move object to correct pos
+        float temph = (*it)->box->getHeight();
+        float tempw = (*it)->box->getWidth();
+
+        (*it)->box->setEdge(GUI_LEFT, actx);
+        (*it)->box->setEdge(GUI_BOTTOM, acty);
+        (*it)->box->setEdge(GUI_RIGHT, actx+tempw);
+        (*it)->box->setEdge(GUI_TOP, acty+temph);
+    }
+}
+
+void GUI_BOX::addRel (GUI_BOX *b, float x, float y) {
+    relDependence = {b, x, y};
+    b->relDependent.push_back(new relPos{this, x, y});
+    b->updateRel();
+}
 
 
-GUI_TEXTURED_BOX::GUI_TEXTURED_BOX () {
+
+
+GUI_TEXTURED_BOX::GUI_TEXTURED_BOX (const char *pic){
+    img = new Image(pic);
+
+    //img.changeImage(pic);
+
     glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.width, img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, img.pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
+
+    box.setShader("../src/vertex/test2.vs", "../src/fragment/test2.fs");
 }
 
 void GUI_TEXTURED_BOX::draw () {
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.width, img.height, 0, GL_RGB, GL_UNSIGNED_BYTE, img.pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     box.draw();
