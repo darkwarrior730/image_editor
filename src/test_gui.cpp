@@ -24,6 +24,10 @@ bool hidden = false;
 bool switchHide = false;
 float preHide = 0.9f;
 
+std::vector<GUI_BOX*> boxes;
+
+GUI_BOX *clicked = nullptr;
+
 void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -58,6 +62,24 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         } else if (action == GLFW_RELEASE) {
             lbutton_down = false;
             prevL = true;
+        }
+        if (action == GLFW_PRESS) {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            ypos = HEIGHT - ypos;
+            xpos = float(xpos/WIDTH)*2.0f - 1.0f;
+            ypos = float(ypos/HEIGHT)*2.0f - 1.0f;
+            //std::cout << "x:y -- " << xpos << ":" << ypos << std::endl;
+            //std::cout << "in1" << std::endl;
+            for (std::vector<GUI_BOX*>::reverse_iterator it = boxes.rbegin(); it != boxes.rend(); ++it) {
+                //std::cout << "in2" << std::endl;
+                //std::cout << (*it)->name << " : in" << std::endl;
+                if ((*it)->checkCollide(xpos, ypos) == 1) {
+                    //std::cout << "in3" << std::endl;
+                    clicked = *it;
+                    break;
+                }
+            }
         }
     }
 }
@@ -105,7 +127,7 @@ int main(int argc, char *argv[])
 
     //box1.setShader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
 
-    GUI_TEXTURED_BOX box1 = GUI_TEXTURED_BOX("pencil.jpg");//"bg.jpg");
+    GUI_TEXTURED_BOX box1 = GUI_TEXTURED_BOX("pencil3.jpg");//"bg.jpg");
 
     box1.box.setEdge(GUI_TOP, 0.9f);
     box1.box.setEdge(GUI_BOTTOM, -1.0f);
@@ -151,16 +173,16 @@ int main(int argc, char *argv[])
     
     box3.updateVertexBuffer();
 
-    GUI_TEXTURED_BOX box4 = GUI_TEXTURED_BOX("pencil.jpg");
+    GUI_TEXTURED_BOX box4 = GUI_TEXTURED_BOX("pencil3.jpg");
 
     box4.box.setEdge(GUI_TOP, 0.05f);
     box4.box.setEdge(GUI_BOTTOM, -0.05f);
     box4.box.setEdge(GUI_RIGHT, 0.05f);
     box4.box.setEdge(GUI_LEFT, -0.05f);
-    
+
     box4.box.updateVertexBuffer();
 
-    GUI_TEXTURED_BOX box5 = GUI_TEXTURED_BOX("pencil.jpg");
+    GUI_TEXTURED_BOX box5 = GUI_TEXTURED_BOX("pencil3.jpg");
 
     box5.box.setEdge(GUI_TOP, 0.05f);
     box5.box.setEdge(GUI_BOTTOM, -0.05f);
@@ -169,7 +191,7 @@ int main(int argc, char *argv[])
     
     box5.box.updateVertexBuffer();
 
-    GUI_TEXTURED_BOX box6 = GUI_TEXTURED_BOX("pencil.jpg");
+    GUI_TEXTURED_BOX box6 = GUI_TEXTURED_BOX("pencil3.jpg");
 
     box6.box.setEdge(GUI_TOP, 0.05f);
     box6.box.setEdge(GUI_BOTTOM, -0.05f);
@@ -185,6 +207,20 @@ int main(int argc, char *argv[])
     box4.box.addRel(&box2, 0.2f, 0.8f);
     box5.box.addRel(&box2, 0.7f, 0.8f);
     box6.box.addRel(&box2, 0.2f, 0.7f);
+
+    box1.box.name = "box1";
+    box2.name = "box2";
+    box3.name = "box3";
+    box4.box.name = "box4";
+    box5.box.name = "box5";
+    box6.box.name = "box6";
+
+    boxes.push_back(&box1.box);
+    boxes.push_back(&box2);
+    boxes.push_back(&box3);
+    boxes.push_back(&box4.box);
+    boxes.push_back(&box5.box);
+    boxes.push_back(&box6.box);
 
     GUI_BOX *bb;
     int be;
@@ -207,6 +243,11 @@ int main(int argc, char *argv[])
         if (glfwGetWindowAttrib(window, GLFW_HOVERED) == false) {
             lbutton_down = false;
             prevL = true;
+        }
+
+        if (clicked != nullptr) {
+            std::cout << clicked->name << std::endl;
+            clicked = nullptr;
         }
 
         if (switchHide == true) {

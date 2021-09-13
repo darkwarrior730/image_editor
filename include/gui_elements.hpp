@@ -71,6 +71,8 @@ public:
     std::vector<relPos*> relDependent;
     relPos relDependence;
 
+    const char *name;
+
     GUI_BOX();
 
     void draw();
@@ -100,6 +102,8 @@ public:
     void updateRel();
 
     void addRel(GUI_BOX *b, float x, float y);
+
+    int checkCollide(double xpos, double ypos);
 };
 
 class GUI_TEXTURED_BOX {

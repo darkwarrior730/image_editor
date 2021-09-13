@@ -277,6 +277,23 @@ void GUI_BOX::addRel (GUI_BOX *b, float x, float y) {
     b->updateRel();
 }
 
+int GUI_BOX::checkCollide (double xpos, double ypos) {
+    int i = 1;
+    //std::cout << "cc : " << name << std::endl;
+    //std::cout << xpos << " : " << ypos << std::endl;
+    if ((xpos < getEdge(GUI_LEFT)) || (xpos > getEdge(GUI_RIGHT))) {
+        i = 0;
+        //std::cout << "a" << std::endl;
+        //std::cout << getEdge(GUI_LEFT) << " - " << getEdge(GUI_RIGHT) << std::endl;
+    }
+    if ((ypos > getEdge(GUI_TOP)) || (ypos < getEdge(GUI_BOTTOM))) {
+        i = 0;
+        //std::cout << "b" << std::endl;
+        //std::cout << getEdge(GUI_LEFT) << " - " << getEdge(GUI_RIGHT) << std::endl;
+    }
+    return i;
+}
+
 
 
 
