@@ -6,27 +6,38 @@
 #include <cstdio>
 #include <iostream>
 #include <cstdint>
+#include <queue>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <ostream>
+#include <string.h>
 
 #include "shader_s.h"
 
 int WIDTH = 640;
 int HEIGHT = 480;
 
-bool lbutton_down = false;
-bool prevL = false;
+//bool lbutton_down = false;
+//bool prevL = false;
+
+bool dragging = false;
 
 bool hidden = false;
-bool switchHide = false;
+//bool switchHide = false;
 float preHide = 0.9f;
 
 std::vector<GUI_BOX*> boxes;
 
 GUI_BOX *clicked = nullptr;
+
+typedef struct event{
+    const char *name;
+    void *data;
+} event;
+
+std::queue<event*> events;
 
 void error_callback(int error, const char *description)
 {
@@ -47,7 +58,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
         if (mods == 2 && key == GLFW_KEY_H) {
-            switchHide = true;
+            //switchHide = true;
+            events.push(new event{"switch_hide_event", new bool(true)});
         }
     }
     //std::cout << mods << std::endl;
@@ -57,11 +69,13 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
-            lbutton_down = true;
-            prevL = false;
+            //lbutton_down = true;
+            //prevL = false;
+            events.push(new event{"left_mouse_event", new bool(true)});
         } else if (action == GLFW_RELEASE) {
-            lbutton_down = false;
-            prevL = true;
+            //lbutton_down = false;
+            //prevL = true;
+            events.push(new event{"left_mouse_event", new bool(false)});
         }
         if (action == GLFW_PRESS) {
             double xpos, ypos;
@@ -76,7 +90,8 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
                 //std::cout << (*it)->name << " : in" << std::endl;
                 if ((*it)->checkCollide(xpos, ypos) == 1) {
                     //std::cout << "in3" << std::endl;
-                    clicked = *it;
+                    //clicked = *it;
+                    events.push(new event{"button_click_event", (*it)});
                     break;
                 }
             }
@@ -240,17 +255,42 @@ int main(int argc, char *argv[])
         c_yfract = yfract*2.0f - 1.0f;
         c_coord = glm::vec2(c_xfract, c_yfract);
 
-        if (glfwGetWindowAttrib(window, GLFW_HOVERED) == false) {
-            lbutton_down = false;
-            prevL = true;
+        if ((glfwGetWindowAttrib(window, GLFW_HOVERED) == false) && (dragging == true)) {
+            //lbutton_down = false;
+            //prevL = true;
+            events.push(new event{"left_mouse_event", new bool(false)});
         }
 
-        if (clicked != nullptr) {
+        while (!events.empty()) {
+            event *current_event = events.front();
+            events.pop();
+            std::cout << current_event->name << std::endl;
+            if (strcmp(current_event->name, "switch_hide_event") == 0) {
+                if (hidden == false) {
+                    preHide = box3.getEdge(GUI_BOTTOM);
+                    box3.setEdge(GUI_BOTTOM, 1.0f);
+                    hidden = true;
+                } else {
+                    box3.setEdge(GUI_BOTTOM, preHide);
+                    hidden = false;
+                }
+            } else if (strcmp(current_event->name, "button_click_event") == 0) {
+                std::cout << "button name : " << ((GUI_BOX*)current_event->data)->name << std::endl;
+            } else if (strcmp(current_event->name, "left_mouse_event") == 0) {
+                if (*(bool*)current_event->data == false) {
+                    dragging = false;
+                } else {
+                    dragging = true;
+                }
+            }
+        }
+
+        /*if (clicked != nullptr) {
             std::cout << clicked->name << std::endl;
             clicked = nullptr;
-        }
+        }*/
 
-        if (switchHide == true) {
+        /*if (switchHide == true) {
             switchHide = false;
             if (hidden == false) {
                 preHide = box3.getEdge(GUI_BOTTOM);
@@ -260,9 +300,9 @@ int main(int argc, char *argv[])
                 box3.setEdge(GUI_BOTTOM, preHide);
                 hidden = false;
             }
-        }
+        }*/
 
-        if (lbutton_down == true) {
+        if (dragging == true) {//lbutton_down == true) {
             //std::cout << "l down" << std::endl;
 
             be = -1;
