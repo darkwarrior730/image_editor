@@ -2,6 +2,7 @@
 #include "shader_s.h"
 
 #include <bits/c++config.h>
+#include <cstring>
 #include <functional>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -298,21 +299,23 @@ int GUI_BOX::checkCollide (double xpos, double ypos) {
 
 
 GUI_TEXTURED_BOX::GUI_TEXTURED_BOX (const char *pic){
-    img = new Image(pic);
-
-    //img.changeImage(pic);
-
     glGenTextures(1, &texture);
 
-    glBindTexture(GL_TEXTURE_2D, texture);
+    if (strcmp(pic, "none") != 0) {
+        img = new Image(pic);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_LINEAR);
+        //img.changeImage(pic);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_LINEAR);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
 
     box.setShader("../src/vertex/test2.vs", "../src/fragment/test2.fs");
 }
@@ -320,8 +323,52 @@ GUI_TEXTURED_BOX::GUI_TEXTURED_BOX (const char *pic){
 void GUI_TEXTURED_BOX::draw () {
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+    //glGenerateMipmap(GL_TEXTURE_2D);
 
     box.draw();
+}
+
+void GUI_TEXTURED_BOX::change_image(Image *image) {
+    img = image;
+    update_texture();
+}
+
+void GUI_TEXTURED_BOX::update_texture() {
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+int GUI_TEXTURED_BOX::checkCollide(double xpos, double ypos) {
+    return box.checkCollide(xpos, ypos);
+}
+
+
+
+
+GUI_BUTTON::GUI_BUTTON (const char *up, const char *down) {
+    up_image = new Image(up);
+    down_image = new Image(down);
+
+    box.change_image(up_image);
+}
+
+void GUI_BUTTON::click () {
+    if (clicked == false) {
+        box.change_image(down_image);
+        clicked = true;
+    } else {
+        box.change_image(up_image);
+        clicked = false;
+    }
+}
+
+void GUI_BUTTON::draw () {
+    box.draw();
+}
+
+int GUI_BUTTON::checkCollide(double xpos, double ypos) {
+    return box.checkCollide(xpos, ypos);
 }

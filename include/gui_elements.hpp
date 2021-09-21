@@ -71,7 +71,7 @@ public:
     std::vector<relPos*> relDependent;
     relPos relDependence;
 
-    const char *name;
+    char *name;
 
     GUI_BOX();
 
@@ -112,12 +112,37 @@ public:
     unsigned int texture;
     Image *img;// = Image();
 
+    char *&name = box.name;
+
     GUI_TEXTURED_BOX(const char *pic);
 
     void draw();
+    void change_image(Image *image);
+    void update_texture();
+
+    int checkCollide(double xpos, double ypos);
 };
 
 /*
 basic color fill shader for GUI_BOX   test3
 texture shader for GUI_TEXTURED_BOX   test2
 */
+
+class GUI_BUTTON {
+public:
+    GUI_TEXTURED_BOX box = GUI_TEXTURED_BOX("none");
+
+    Image *up_image;
+    Image *down_image;
+
+    bool clicked = false;
+
+    char *&name = box.name;
+
+    GUI_BUTTON(const char *up, const char *down);
+
+    void click();
+    void draw();
+
+    int checkCollide(double xpos, double ypos);
+};
