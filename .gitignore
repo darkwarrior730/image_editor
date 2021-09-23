@@ -3,3 +3,4 @@
 /bin/*
 /.clangd
 /compile_commands.json
+/src/app_backup.cpp
