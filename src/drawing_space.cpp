@@ -22,6 +22,7 @@ void drawingSpace::createBlankCanvas(int x, int y) {
     canvas->height = y;
     canvas->width = x;
     canvas->pixels = (uint8_t*)malloc(x*y*3);
+    memset(canvas->pixels, 255, x*y*3);
     gui.change_image(canvas);
 }
 

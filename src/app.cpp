@@ -25,7 +25,7 @@ drawingSpace *ds;
 
 bool dragging = false;
 
-enum dm {MODE_DRAG, MODE_BRUSH, MODE_ERASER, MODE_LINE} mode = MODE_DRAG; 
+enum dm {MODE_DRAG, MODE_BRUSH, MODE_LINE} mode = MODE_DRAG; 
 
 std::vector<GUI_BUTTON*> buttons;
 
@@ -37,6 +37,10 @@ typedef struct event{
 } event;
 
 std::queue<event*> events;
+
+int linestep = 0;
+int line_x = 0;
+int line_y = 0;
 
 void error_callback(int error, const char *description)
 {
@@ -83,39 +87,75 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     }
 }
 
+void plotLineLow(drawingSpace *ds, int x0, int y0, int x1, int y1, uint8_t r, uint8_t g, uint8_t b) {
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int yi = 1;
+    if (dy < 0) {
+        yi = -1;
+        dy = -dy;
     }
-    if (press_minus == true) {
-        press_minus = false;
-        
-        //std::cout << scale << " - " << temp << std::endl;
-
-        if (scale == 1.0f) {
-            return;
+    int D = (2 * dy) - dx;
+    int y = y0;
+    for (int x = x0; x < x1; x++) {
+        ds->setPixel(x, y, r, g, b);
+        if (D > 0) {
+            y = y + yi;
+            D = D + (2 * (dy - dx));
+        } else {
+            D = D + 2 * dy;
         }
+    }
+}
 
-        scale /= 2.0f;
-        temp = (1.0f - (1.0f / scale))/2;
+void plotLineHigh(drawingSpace *ds, int x0, int y0, int x1, int y1, uint8_t r, uint8_t g, uint8_t b) {
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int xi = 1;
+    if (dx < 0) {
+        xi = -1;
+        dx = -dx;
+    }
+    int D = (2 * dx) - dy;
+    int x = x0;
+    for (int y = y0; y < y1; y++) {
+        ds->setPixel(x, y, r, g, b);
+        if (D > 0) {
+            x = x + xi;
+            D = D + (2 * (dx - dy));
+        } else {
+            D = D + 2 * dx;
+        }
+    }
+}
 
-        std::cout << scale << " - " << temp << std::endl;
+void plotLine(drawingSpace *ds, int x0, int y0, int x1, int y1, uint8_t r, uint8_t g, uint8_t b) {
+    if (abs(y1 - y0) < abs(x1 - x0)) {
+        if (x0 > x1) {
+            plotLineLow(ds, x1, y1, x0, y0, r, g, b);
+        } else {
+            plotLineLow(ds, x0, y0, x1, y1, r, g, b);
+        }
+    } else {
+        if (y0 > y1) {
+            plotLineHigh(ds, x1, y1, x0, y0, r, g, b);
+        } else {
+            plotLineHigh(ds, x0, y0, x1, y1, r, g, b);
+        }
+    }
+}
 
-        vertices[6] = 1.0f-temp;
-        vertices[7] = 1.0f-temp;
-        
-        vertices[8+6] = 1.0f-temp;
-        vertices[8+7] = temp;
-        
-        vertices[16+6] = temp;
-        vertices[16+7] = temp;
-
-        vertices[24+6] = temp;
-        vertices[24+7] = 1.0f-temp;
+void setModeDrag() {
+    mode = MODE_DRAG;
+}
 
 void setModeBrush() {
     mode = MODE_BRUSH;
 }
 
-void setModeDrag() {
-    mode = MODE_DRAG;
+void setModeLine() {
+    mode = MODE_LINE;
+    linestep = 0;
 }
 
 int main(int argc, char *argv[])
@@ -152,8 +192,8 @@ int main(int argc, char *argv[])
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     ds = new drawingSpace();
-    //ds->createBlankCanvas(WIDTH, HEIGHT);
-    ds->createImageCanvas("bg.jpg");
+    ds->createBlankCanvas(128, 128);
+    //ds->createImageCanvas("bg.jpg");
 
     ds->gui.box.setEdge(GUI_TOP, 0.9f);
     ds->gui.box.setEdge(GUI_LEFT, -0.8);
@@ -191,6 +231,23 @@ int main(int argc, char *argv[])
 
     buttons.push_back(&brushbutton);
 
+    GUI_BUTTON linebutton = GUI_BUTTON("pencil3.jpg", "pencil.jpg", setModeLine, setModeDrag);
+
+    linebutton.box.box.setEdge(GUI_TOP, 0.05f);
+    linebutton.box.box.setEdge(GUI_BOTTOM, -0.05f);
+    linebutton.box.box.setEdge(GUI_RIGHT, 0.05f);
+    linebutton.box.box.setEdge(GUI_LEFT, -0.05f);
+
+    linebutton.box.box.updateVertexBuffer();
+
+    linebutton.box.box.addRel(&box2, 0.5f, 0.25f);
+
+    linebutton.name = (char*)"line mode button";
+
+    buttons.push_back(&linebutton);
+
+    //plotLine(ds, 0, 0, ds->canvas->width, ds->canvas->height, 0, 0, 0);
+
     double xpos, ypos;
     float xfract, yfract;
     float c_xfract, c_yfract;
@@ -223,6 +280,19 @@ int main(int argc, char *argv[])
                     dragging = false;
                 } else {
                     dragging = true;
+                    if (mode == MODE_LINE) {
+                        float tempy = (c_yfract - ds->gui.box.getEdge(GUI_BOTTOM))/(ds->gui.box.getEdge(GUI_TOP) - ds->gui.box.getEdge(GUI_BOTTOM));
+                        float tempx = (c_xfract - ds->gui.box.getEdge(GUI_RIGHT))/(ds->gui.box.getEdge(GUI_LEFT) - ds->gui.box.getEdge(GUI_RIGHT));
+                        //std::cout << tempx << ", " << tempy << std::endl;
+                        if (linestep == 0) {
+                            line_x = ds->canvas->width*(1.0f-tempx);
+                            line_y = ds->canvas->height*(1.0f-tempy);
+                            linestep = 1;
+                        } else {
+                            linestep = 0;
+                            plotLine(ds, (int)line_x, (int)line_y, (int)ds->canvas->width*(1.0f-tempx), (int)ds->canvas->height*(1.0f-tempy), 0, 0, 0);
+                        }
+                    }
                 }
             }
         }
@@ -230,16 +300,11 @@ int main(int argc, char *argv[])
         if (dragging == true) {
             if (mode == MODE_BRUSH) {
                 if (ds->gui.checkCollide(c_xfract, c_yfract)) {
-                //std::cout << (int)(ds->canvas->width*(xfract)) << " - " << (int)(ds->canvas->height*(yfract)) << std::endl;
-                    //float tempy = (2.0f)/(ds->gui.box.getEdge(GUI_TOP) - ds->gui.box.getEdge(GUI_BOTTOM));
-                    //float tempx = (2.0f)/(ds->gui.box.getEdge(GUI_LEFT) - ds->gui.box.getEdge(GUI_RIGHT));
                     float tempy = (c_yfract - ds->gui.box.getEdge(GUI_BOTTOM))/(ds->gui.box.getEdge(GUI_TOP) - ds->gui.box.getEdge(GUI_BOTTOM));
                     float tempx = (c_xfract - ds->gui.box.getEdge(GUI_RIGHT))/(ds->gui.box.getEdge(GUI_LEFT) - ds->gui.box.getEdge(GUI_RIGHT));
-                    //std::cout << xfract << " - " << yfract << std::endl;
-                    //std::cout << tempx << ", " << tempy << std::endl;
                     for (int i = ds->canvas->width*(1.0f-tempx)-10; i < ds->canvas->width*(1.0f-tempx)+10; ++i) {
                         for (int j = ds->canvas->height*(1.0f-tempy)-10; j < ds->canvas->height*(1.0f-tempy)+10; ++j) {
-                            if ((i > 0 && i < ds->canvas->width) && (j > 0 && j < ds->canvas->height)) {
+                            if ((i >= 0 && i < ds->canvas->width) && (j >= 0 && j < ds->canvas->height)) {
                                 ds->setPixel((int)i, (int)j, 0, 0, 0);
                             }
                         }
@@ -256,6 +321,7 @@ int main(int argc, char *argv[])
         box1.draw();
         box2.draw();
         brushbutton.draw();
+        linebutton.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
