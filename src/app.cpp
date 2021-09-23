@@ -2,6 +2,7 @@
 #include "image_handler.hpp"
 #include "drawing_space.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -25,7 +26,7 @@ drawingSpace *ds;
 
 bool dragging = false;
 
-enum dm {MODE_DRAG, MODE_BRUSH, MODE_LINE} mode = MODE_DRAG; 
+enum dm {MODE_DRAG, MODE_BRUSH, MODE_LINE, MODE_FILL} mode = MODE_DRAG; 
 
 std::vector<GUI_BUTTON*> buttons;
 
@@ -145,6 +146,29 @@ void plotLine(drawingSpace *ds, int x0, int y0, int x1, int y1, uint8_t r, uint8
     }
 }
 
+typedef struct point {int x; int y;} point;
+
+void floodFill(drawingSpace *ds, int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    std::queue<point*> toVisit;
+    toVisit.push(new point{x, y});
+    point *temp;
+    struct color t;
+    struct color c = ds->getPixel(x, y);
+    while (!toVisit.empty()) {
+        temp = toVisit.front();
+        t = ds->getPixel(temp->x, temp->y);
+        if (t.r == c.r && t.g == c.g && t.b == c.b) {
+            ds->setPixel(temp->x, temp->y, r, g, b);
+            // need to perform bounds checking
+            toVisit.push(new point{temp->x+1, temp->y});
+            toVisit.push(new point{temp->x-1, temp->y});
+            toVisit.push(new point{temp->x, temp->y+1});
+            toVisit.push(new point{temp->x, temp->y-1});
+        }
+        toVisit.pop();
+    }
+}
+
 void setModeDrag() {
     mode = MODE_DRAG;
 }
@@ -156,6 +180,10 @@ void setModeBrush() {
 void setModeLine() {
     mode = MODE_LINE;
     linestep = 0;
+}
+
+void setModeFill() {
+    mode = MODE_FILL;
 }
 
 int main(int argc, char *argv[])
@@ -210,9 +238,11 @@ int main(int argc, char *argv[])
 
     GUI_BOX box2 = GUI_BOX();
     box2.setEdge(GUI_RIGHT, -0.8f);
+    box2.setEdge(GUI_TOP, 0.9f);
     box2.setFillColor(0.5f, 0.5f, 0.5f);
 
-    //box2.anchorEdge(GUI_RIGHT, &(ds->gui.box), GUI_LEFT);
+    box2.anchorEdge(GUI_RIGHT, &(ds->gui.box), GUI_LEFT);
+    box2.anchorEdge(GUI_TOP, &box1, GUI_BOTTOM);
 
     box2.name = (char*)"buttonsmenu";
 
@@ -225,7 +255,7 @@ int main(int argc, char *argv[])
 
     brushbutton.box.box.updateVertexBuffer();
 
-    brushbutton.box.box.addRel(&box2, 0.5f, 0.5f);
+    brushbutton.box.box.addRel(&box2, 0.5f, 0.75f);
 
     brushbutton.name = (char*)"brush mode button";
 
@@ -240,11 +270,26 @@ int main(int argc, char *argv[])
 
     linebutton.box.box.updateVertexBuffer();
 
-    linebutton.box.box.addRel(&box2, 0.5f, 0.25f);
+    linebutton.box.box.addRel(&box2, 0.5f, 0.5f);
 
     linebutton.name = (char*)"line mode button";
 
     buttons.push_back(&linebutton);
+
+    GUI_BUTTON fillbutton = GUI_BUTTON("pencil3.jpg", "pencil.jpg", setModeFill, setModeDrag);
+
+    fillbutton.box.box.setEdge(GUI_TOP, 0.05f);
+    fillbutton.box.box.setEdge(GUI_BOTTOM, -0.05f);
+    fillbutton.box.box.setEdge(GUI_RIGHT, 0.05f);
+    fillbutton.box.box.setEdge(GUI_LEFT, -0.05f);
+
+    fillbutton.box.box.updateVertexBuffer();
+
+    fillbutton.box.box.addRel(&box2, 0.5f, 0.25f);
+
+    fillbutton.name = (char*)"fill mode button";
+
+    buttons.push_back(&fillbutton);
 
     //plotLine(ds, 0, 0, ds->canvas->width, ds->canvas->height, 0, 0, 0);
 
@@ -280,17 +325,26 @@ int main(int argc, char *argv[])
                     dragging = false;
                 } else {
                     dragging = true;
+                    float tempy = (c_yfract - ds->gui.box.getEdge(GUI_BOTTOM))/(ds->gui.box.getEdge(GUI_TOP) - ds->gui.box.getEdge(GUI_BOTTOM));
+                    float tempx = (c_xfract - ds->gui.box.getEdge(GUI_RIGHT))/(ds->gui.box.getEdge(GUI_LEFT) - ds->gui.box.getEdge(GUI_RIGHT));
+                    tempx = ds->canvas->width*(1.0f-tempx);
+                    tempy = ds->canvas->height*(1.0f-tempy);
                     if (mode == MODE_LINE) {
-                        float tempy = (c_yfract - ds->gui.box.getEdge(GUI_BOTTOM))/(ds->gui.box.getEdge(GUI_TOP) - ds->gui.box.getEdge(GUI_BOTTOM));
-                        float tempx = (c_xfract - ds->gui.box.getEdge(GUI_RIGHT))/(ds->gui.box.getEdge(GUI_LEFT) - ds->gui.box.getEdge(GUI_RIGHT));
-                        //std::cout << tempx << ", " << tempy << std::endl;
-                        if (linestep == 0) {
-                            line_x = ds->canvas->width*(1.0f-tempx);
-                            line_y = ds->canvas->height*(1.0f-tempy);
-                            linestep = 1;
-                        } else {
-                            linestep = 0;
-                            plotLine(ds, (int)line_x, (int)line_y, (int)ds->canvas->width*(1.0f-tempx), (int)ds->canvas->height*(1.0f-tempy), 0, 0, 0);
+                        if (ds->gui.checkCollide(c_xfract, c_yfract)) {
+                            //std::cout << tempx << ", " << tempy << std::endl;
+                            if (linestep == 0) {
+                                line_x = tempx;
+                                line_y = tempy;
+                                linestep = 1;
+                            } else {
+                                linestep = 0;
+                                plotLine(ds, (int)line_x, (int)line_y, (int)tempx, (int)tempy, 0, 0, 0);
+                            }
+                        }
+                    } else
+                    if (mode == MODE_FILL) {
+                        if (ds->gui.checkCollide(c_xfract, c_yfract)) {
+                            floodFill(ds, tempx, tempy, 0, 0, 0);
                         }
                     }
                 }
@@ -322,6 +376,7 @@ int main(int argc, char *argv[])
         box2.draw();
         brushbutton.draw();
         linebutton.draw();
+        fillbutton.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
