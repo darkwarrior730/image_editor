@@ -84,6 +84,9 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     }
 }
 
+void doup() { std::cout << "i've been unpressed" << std::endl;}
+void dodown() { std::cout << "i've been pressed down" << std::endl;}
+
 int main(int argc, char *argv[])
 {
     if (!glfwInit()) {
@@ -161,7 +164,7 @@ int main(int argc, char *argv[])
     
     box3.updateVertexBuffer();
 
-    GUI_BUTTON button1 = GUI_BUTTON("pencil3.jpg", "pencil.jpg");
+    GUI_BUTTON button1 = GUI_BUTTON("pencil3.jpg", "pencil.jpg", dodown, doup);
 
     button1.box.box.setEdge(GUI_TOP, 0.05f);
     button1.box.box.setEdge(GUI_BOTTOM, -0.05f);
@@ -170,7 +173,7 @@ int main(int argc, char *argv[])
 
     button1.box.box.updateVertexBuffer();
 
-    GUI_BUTTON button2 = GUI_BUTTON("pencil3.jpg", "pencil.jpg");
+    GUI_BUTTON button2 = GUI_BUTTON("pencil3.jpg", "pencil.jpg", dodown, doup);
 
     button2.box.box.setEdge(GUI_TOP, 0.05f);
     button2.box.box.setEdge(GUI_BOTTOM, -0.05f);
@@ -179,7 +182,7 @@ int main(int argc, char *argv[])
 
     button2.box.box.updateVertexBuffer();
 
-    GUI_BUTTON button3 = GUI_BUTTON("pencil3.jpg", "pencil.jpg");
+    GUI_BUTTON button3 = GUI_BUTTON("pencil3.jpg", "pencil.jpg", dodown, doup);
 
     button3.box.box.setEdge(GUI_TOP, 0.05f);
     button3.box.box.setEdge(GUI_BOTTOM, -0.05f);
@@ -227,7 +230,7 @@ int main(int argc, char *argv[])
         while (!events.empty()) {
             event *current_event = events.front();
             events.pop();
-            std::cout << current_event->name << std::endl;
+            //std::cout << current_event->name << std::endl;
             if (strcmp(current_event->name, "switch_hide_event") == 0) {
                 if (hidden == false) {
                     preHide = box3.getEdge(GUI_BOTTOM);
@@ -239,7 +242,7 @@ int main(int argc, char *argv[])
                 }
             } else if (strcmp(current_event->name, "button_click_event") == 0) {
                 GUI_BUTTON *temp = (GUI_BUTTON*)current_event->data;
-                std::cout << "button name : " << temp->name << std::endl;
+                //std::cout << "button name : " << temp->name << std::endl;
                 temp->click();
             } else if (strcmp(current_event->name, "left_mouse_event") == 0) {
                 if (*(bool*)current_event->data == false) {

@@ -348,9 +348,12 @@ int GUI_TEXTURED_BOX::checkCollide(double xpos, double ypos) {
 
 
 
-GUI_BUTTON::GUI_BUTTON (const char *up, const char *down) {
+GUI_BUTTON::GUI_BUTTON (const char *up, const char *down, void (*df)(), void (*uf)()) {
     up_image = new Image(up);
     down_image = new Image(down);
+
+    downfunc = df;
+    upfunc = uf;
 
     box.change_image(up_image);
 }
@@ -359,9 +362,11 @@ void GUI_BUTTON::click () {
     if (clicked == false) {
         box.change_image(down_image);
         clicked = true;
+        downfunc();
     } else {
         box.change_image(up_image);
         clicked = false;
+        upfunc();
     }
 }
 

@@ -135,11 +135,14 @@ public:
     Image *up_image;
     Image *down_image;
 
+    void (*downfunc)();
+    void (*upfunc)();
+
     bool clicked = false;
 
     char *&name = box.name;
 
-    GUI_BUTTON(const char *up, const char *down);
+    GUI_BUTTON(const char *up, const char *down, void (*df)(), void (*uf)());
 
     void click();
     void draw();
