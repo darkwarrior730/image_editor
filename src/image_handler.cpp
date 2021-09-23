@@ -6,7 +6,9 @@
 #include "stb_image_write.h"
 
 Image::Image (const char *pic) {
-    pixels = stbi_load(pic, &width, &height, &bpp, 3);
+    if (strcmp(pic, "none") != 0) {
+        pixels = stbi_load(pic, &width, &height, &bpp, 3);
+    }
 }
 
 /*void Image::changeImage (const char *pic) {

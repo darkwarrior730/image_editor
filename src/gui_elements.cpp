@@ -38,7 +38,6 @@ GUI_BOX::GUI_BOX () {
 }
 
 void GUI_BOX::draw () {
-
     updateVertexBuffer();
 
     shader.use();
