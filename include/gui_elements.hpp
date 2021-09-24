@@ -149,3 +149,17 @@ public:
 
     int checkCollide(double xpos, double ypos);
 };
+
+class GUI_TEXT {
+public:
+    GUI_TEXTURED_BOX **boxes;
+
+    size_t boxes_size;
+    size_t text_len;
+
+    Image *charmap = new Image("Text.png");
+
+    GUI_TEXT(const char *text, float x, float y, float w, float h);
+
+    void draw();
+};

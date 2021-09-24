@@ -297,6 +297,8 @@ int main(int argc, char *argv[])
 
     buttons.push_back(&fillbutton);
 
+    GUI_TEXT hello = GUI_TEXT("cabba", 0.0f, 0.0f, 0.05f, 0.05f);
+
     //plotLine(ds, 0, 0, ds->canvas->width, ds->canvas->height, 0, 0, 0);
 
     double xpos, ypos;
@@ -401,6 +403,7 @@ int main(int argc, char *argv[])
         brushbutton.draw();
         linebutton.draw();
         fillbutton.draw();
+        hello.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -381,3 +381,52 @@ void GUI_BUTTON::draw () {
 int GUI_BUTTON::checkCollide(double xpos, double ypos) {
     return box.checkCollide(xpos, ypos);
 }
+
+
+
+
+GUI_TEXT::GUI_TEXT (const char *text, float x, float y, float w, float h) {
+    text_len = strlen(text);
+    boxes_size = text_len*sizeof(GUI_TEXTURED_BOX*);
+    boxes = (GUI_TEXTURED_BOX**)malloc(boxes_size);
+    char c;
+    for (size_t i = 0; i < text_len; ++i) {
+        c = text[i];
+        boxes[i] = new GUI_TEXTURED_BOX("none");
+        boxes[i]->change_image(charmap);
+        boxes[i]->box.setEdge(GUI_TOP, y);
+        boxes[i]->box.setEdge(GUI_BOTTOM, y-h);
+        boxes[i]->box.setEdge(GUI_LEFT, x+(w*i));
+        boxes[i]->box.setEdge(GUI_RIGHT, x+(w*(i+1)));
+        float o = 1.0f/8.0f;
+        float u;
+        float v;
+        switch (c) {
+            case 'a':
+                u = 1.0f*o;
+                v = 0.0f*o;
+                break;
+            case 'b':
+                u = 2.0f*o;
+                v = 0.0f*o;
+                break;
+            case 'c':
+                u = 3.0f*o;
+                v = 0.0f*o;
+                break;
+        }
+        v = 1.0f - v;
+        boxes[i]->box.setVertexTexCoord(0, u+o, v); //top right
+        boxes[i]->box.setVertexTexCoord(1, u+o, v-o); //bottom right
+        boxes[i]->box.setVertexTexCoord(2, u, v-o); //bottom left
+        boxes[i]->box.setVertexTexCoord(3, u, v); //top left
+        //std::cout << c << std::endl;
+        //std::cout << u << " - " << v << std::endl;
+    }
+}
+
+void GUI_TEXT::draw () {
+    for (size_t i = 0; i < text_len; ++i) {
+        boxes[i]->draw();
+    }
+}
