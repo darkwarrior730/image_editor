@@ -33,8 +33,8 @@ void drawingSpace::setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     *(canvas->pixels + temp + 2) = b;
 }
 
-struct color drawingSpace::getPixel(int x, int y) {
-    struct color res;
+color drawingSpace::getPixel(int x, int y) {
+    color res;
     int temp = ((y*canvas->width + x)*3);
     res.r = *(canvas->pixels + temp);
     res.g = *(canvas->pixels + temp + 1);

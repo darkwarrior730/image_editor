@@ -43,6 +43,10 @@ int linestep = 0;
 int line_x = 0;
 int line_y = 0;
 
+color current_color = {0, 0, 0};
+
+GUI_BUTTON *currently_down = nullptr;
+
 void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -60,6 +64,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
+        } else {
+            events.push(new event{"key_event", new int(key)});
         }
     }
 }
@@ -152,18 +158,18 @@ void floodFill(drawingSpace *ds, int x, int y, uint8_t r, uint8_t g, uint8_t b) 
     std::queue<point*> toVisit;
     toVisit.push(new point{x, y});
     point *temp;
-    struct color t;
-    struct color c = ds->getPixel(x, y);
+    color t;
+    color c = ds->getPixel(x, y);
     while (!toVisit.empty()) {
         temp = toVisit.front();
         t = ds->getPixel(temp->x, temp->y);
         if (t.r == c.r && t.g == c.g && t.b == c.b) {
             ds->setPixel(temp->x, temp->y, r, g, b);
             // need to perform bounds checking
-            toVisit.push(new point{temp->x+1, temp->y});
-            toVisit.push(new point{temp->x-1, temp->y});
-            toVisit.push(new point{temp->x, temp->y+1});
-            toVisit.push(new point{temp->x, temp->y-1});
+            if (x+1 < ds->canvas->width) toVisit.push(new point{temp->x+1, temp->y});
+            if (x-1 >= 0) toVisit.push(new point{temp->x-1, temp->y});
+            if (y+1 < ds->canvas->height) toVisit.push(new point{temp->x, temp->y+1});
+            if (y-1 >= 0) toVisit.push(new point{temp->x, temp->y-1});
         }
         toVisit.pop();
     }
@@ -319,7 +325,25 @@ int main(int argc, char *argv[])
             if (strcmp(current_event->name, "button_click_event") == 0) {
                 GUI_BUTTON *temp = (GUI_BUTTON*)current_event->data;
                 //std::cout << "button name : " << temp->name << std::endl;
+                if (currently_down != nullptr) currently_down->click();
                 temp->click();
+                currently_down = temp;
+            } else if (strcmp(current_event->name, "key_event") == 0){
+                if (*(int*)(current_event->data) == GLFW_KEY_W) {
+                    current_color = {255, 255, 255};
+                } else
+                if (*(int*)(current_event->data) == GLFW_KEY_D) {
+                    current_color = {0, 0, 0};
+                } else
+                if (*(int*)(current_event->data) == GLFW_KEY_R) {
+                    current_color = {255, 0, 0};
+                } else
+                if (*(int*)(current_event->data) == GLFW_KEY_G) {
+                    current_color = {0, 255, 0};
+                } else
+                if (*(int*)(current_event->data) == GLFW_KEY_B) {
+                    current_color = {0, 0, 255};
+                }
             } else if (strcmp(current_event->name, "left_mouse_event") == 0) {
                 if (*(bool*)current_event->data == false) {
                     dragging = false;
@@ -338,13 +362,13 @@ int main(int argc, char *argv[])
                                 linestep = 1;
                             } else {
                                 linestep = 0;
-                                plotLine(ds, (int)line_x, (int)line_y, (int)tempx, (int)tempy, 0, 0, 0);
+                                plotLine(ds, (int)line_x, (int)line_y, (int)tempx, (int)tempy, current_color.r, current_color.g, current_color.b);
                             }
                         }
                     } else
                     if (mode == MODE_FILL) {
                         if (ds->gui.checkCollide(c_xfract, c_yfract)) {
-                            floodFill(ds, tempx, tempy, 0, 0, 0);
+                            floodFill(ds, tempx, tempy, current_color.r, current_color.g, current_color.b);
                         }
                     }
                 }
@@ -359,7 +383,7 @@ int main(int argc, char *argv[])
                     for (int i = ds->canvas->width*(1.0f-tempx)-10; i < ds->canvas->width*(1.0f-tempx)+10; ++i) {
                         for (int j = ds->canvas->height*(1.0f-tempy)-10; j < ds->canvas->height*(1.0f-tempy)+10; ++j) {
                             if ((i >= 0 && i < ds->canvas->width) && (j >= 0 && j < ds->canvas->height)) {
-                                ds->setPixel((int)i, (int)j, 0, 0, 0);
+                                ds->setPixel((int)i, (int)j, current_color.r, current_color.g, current_color.b);
                             }
                         }
                     }

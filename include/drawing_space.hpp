@@ -4,11 +4,11 @@
 #include "image_handler.hpp"
 #include "shader_s.h"
 
-struct color {
+typedef struct color {
     uint8_t r;
     uint8_t g;
     uint8_t b;
-};
+} color;
 
 class drawingSpace {
 public:
