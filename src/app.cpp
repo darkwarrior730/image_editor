@@ -297,7 +297,8 @@ int main(int argc, char *argv[])
 
     buttons.push_back(&fillbutton);
 
-    GUI_TEXT hello = GUI_TEXT("cabba", 0.0f, 0.0f, 0.05f, 0.05f);
+    GUI_TEXT hello = GUI_TEXT("the quick brown fox", -0.5f, 0.0f, 0.05f, 0.05f);
+    GUI_TEXT hello2 = GUI_TEXT("jumped over the lazy dog", -0.5f, -0.05f, 0.05f, 0.05f);
 
     //plotLine(ds, 0, 0, ds->canvas->width, ds->canvas->height, 0, 0, 0);
 
@@ -328,8 +329,12 @@ int main(int argc, char *argv[])
                 GUI_BUTTON *temp = (GUI_BUTTON*)current_event->data;
                 //std::cout << "button name : " << temp->name << std::endl;
                 if (currently_down != nullptr) currently_down->click();
-                temp->click();
-                currently_down = temp;
+                if (currently_down != temp) {
+                    temp->click();
+                    currently_down = temp;
+                } else {
+                    currently_down = nullptr;
+                }
             } else if (strcmp(current_event->name, "key_event") == 0){
                 if (*(int*)(current_event->data) == GLFW_KEY_W) {
                     current_color = {255, 255, 255};
@@ -404,6 +409,7 @@ int main(int argc, char *argv[])
         linebutton.draw();
         fillbutton.draw();
         hello.draw();
+        hello2.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

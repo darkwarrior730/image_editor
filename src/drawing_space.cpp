@@ -21,13 +21,13 @@ void drawingSpace::createBlankCanvas(int x, int y) {
     canvas->bpp = 3;
     canvas->height = y;
     canvas->width = x;
-    canvas->pixels = (uint8_t*)malloc(x*y*3);
-    memset(canvas->pixels, 255, x*y*3);
+    canvas->pixels = (uint8_t*)malloc(x*y*4);
+    memset(canvas->pixels, 255, x*y*4);
     gui.change_image(canvas);
 }
 
 void drawingSpace::setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
-    int temp = ((y*canvas->width + x)*3);
+    int temp = ((y*canvas->width + x)*4);
     *(canvas->pixels + temp) = r;
     *(canvas->pixels + temp + 1) = g;
     *(canvas->pixels + temp + 2) = b;
@@ -35,7 +35,7 @@ void drawingSpace::setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
 
 color drawingSpace::getPixel(int x, int y) {
     color res;
-    int temp = ((y*canvas->width + x)*3);
+    int temp = ((y*canvas->width + x)*4);
     res.r = *(canvas->pixels + temp);
     res.g = *(canvas->pixels + temp + 1);
     res.b = *(canvas->pixels + temp + 2);

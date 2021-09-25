@@ -7,7 +7,7 @@
 
 Image::Image (const char *pic) {
     if (strcmp(pic, "none") != 0) {
-        pixels = stbi_load(pic, &width, &height, &bpp, 3);
+        pixels = stbi_load(pic, &width, &height, &bpp, 4);
     }
 }
 
@@ -17,7 +17,7 @@ Image::Image (const char *pic) {
 }*/
 
 void Image::writePixels () {
-    stbi_write_jpg("image.jpg", width, height, 3, pixels, 100);
+    stbi_write_jpg("image.jpg", width, height, 4, pixels, 100);
 }
 
 void Image::freeImage () {

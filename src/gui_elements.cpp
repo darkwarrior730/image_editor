@@ -312,7 +312,7 @@ GUI_TEXTURED_BOX::GUI_TEXTURED_BOX (const char *pic){
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_LINEAR);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
@@ -341,7 +341,7 @@ void GUI_TEXTURED_BOX::update_texture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
@@ -402,6 +402,10 @@ GUI_TEXT::GUI_TEXT (const char *text, float x, float y, float w, float h) {
         float u;
         float v;
         switch (c) {
+            case ' ':
+                u = 0.0f*o;
+                v = 0.0f*o;
+                break;
             case 'a':
                 u = 1.0f*o;
                 v = 0.0f*o;
@@ -414,8 +418,101 @@ GUI_TEXT::GUI_TEXT (const char *text, float x, float y, float w, float h) {
                 u = 3.0f*o;
                 v = 0.0f*o;
                 break;
+            case 'd':
+                u = 4.0f*o;
+                v = 0.0f*o;
+                break;
+            case 'e':
+                u = 5.0f*o;
+                v = 0.0f*o;
+                break;
+            case 'f':
+                u = 6.0f*o;
+                v = 0.0f*o;
+                break;
+            case 'g':
+                u = 7.0f*o;
+                v = 0.0f*o;
+                break;
+            case 'h':
+                u = 0.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'i':
+                u = 1.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'j':
+                u = 2.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'k':
+                u = 3.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'l':
+                u = 4.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'm':
+                u = 5.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'n':
+                u = 6.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'o':
+                u = 7.0f*o;
+                v = 1.0f*o;
+                break;
+            case 'p':
+                u = 0.0f*o;
+                v = 2.0f*o;
+                break;
+            case 'q':
+                u = 1.0f*o;
+                v = 2.0f*o;
+                break;
+            case 'r':
+                u = 2.0f*o;
+                v = 2.0f*o;
+                break;
+            case 's':
+                u = 3.0f*o;
+                v = 2.0f*o;
+                break;
+            case 't':
+                u = 4.0f*o;
+                v = 2.0f*o;
+                break;
+            case 'u':
+                u = 5.0f*o;
+                v = 2.0f*o;
+                break;
+            case 'v':
+                u = 6.0f*o;
+                v = 2.0f*o;
+                break;
+            case 'w':
+                u = 7.0f*o;
+                v = 2.0f*o;
+                break;
+            case 'x':
+                u = 0.0f*o;
+                v = 3.0f*o;
+                break;
+            case 'y':
+                u = 1.0f*o;
+                v = 3.0f*o;
+                break;
+            case 'z':
+                u = 2.0f*o;
+                v = 3.0f*o;
+                break;
         }
         v = 1.0f - v;
+        //std::cout << u << " - " << u+o << ", " << v << " - " << v+o << std::endl;
         boxes[i]->box.setVertexTexCoord(0, u+o, v); //top right
         boxes[i]->box.setVertexTexCoord(1, u+o, v-o); //bottom right
         boxes[i]->box.setVertexTexCoord(2, u, v-o); //bottom left
