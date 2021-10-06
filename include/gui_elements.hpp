@@ -163,3 +163,24 @@ public:
 
     void draw();
 };
+
+class GUI_INPUT_TEXT {
+public:
+    std::vector<GUI_TEXT*> text_lines;
+
+    float pos_x;
+    float pos_y;
+    float width;
+    float height;
+
+    int row;
+    int column;
+
+    int text_len = 0;
+
+    GUI_INPUT_TEXT(float x, float y, float w, float h, int r, int c);
+
+    int checkCollide(double xpos, double ypos);
+
+    void add_character(int key);
+};

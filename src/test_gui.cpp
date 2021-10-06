@@ -77,7 +77,8 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             for (std::vector<GUI_BUTTON*>::reverse_iterator it = buttons.rbegin(); it != buttons.rend(); ++it) {
                 if ((*it)->checkCollide(xpos, ypos) == 1) {
                     events.push(new event{"button_click_event", (*it)});
-                    break;
+                    // break;
+                    return;
                 }
             }
         }

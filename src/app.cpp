@@ -30,6 +30,10 @@ enum dm {MODE_DRAG, MODE_BRUSH, MODE_LINE, MODE_FILL} mode = MODE_DRAG;
 
 std::vector<GUI_BUTTON*> buttons;
 
+std::vector<GUI_INPUT_TEXT*> input_text;
+
+GUI_INPUT_TEXT *cur_active_text_input = nullptr;
+
 GUI_BOX *clicked = nullptr;
 
 typedef struct event{
@@ -67,6 +71,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         } else {
             events.push(new event{"key_event", new int(key)});
         }
+        if (cur_active_text_input != nullptr) {
+            cur_active_text_input->add_character(key);
+        }
     }
 }
 
@@ -90,7 +97,15 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
                     break;
                 }
             }
+            for (std::vector<GUI_INPUT_TEXT*>::reverse_iterator it = input_text.rbegin(); it != input_text.rend(); ++it) {
+                if ((*it)->checkCollide(xpos, ypos) == 1) {
+                    events.push(new event{"input_text_click_event", (*it)});
+                    // break;
+                    return;
+                }
+            }
         }
+
     }
 }
 
@@ -234,6 +249,9 @@ int main(int argc, char *argv[])
 
     ds->gui.name = (char*)"drawing";
 
+    GUI_INPUT_TEXT text_box = GUI_INPUT_TEXT(-0.8f, 0.9f, 1.8f, 1.9f, 80, 50);
+    input_text.push_back(&text_box);
+
     GUI_BOX box1 = GUI_BOX();
     box1.setEdge(GUI_BOTTOM, 0.9f);
     box1.setFillColor(1.0f, 0.0f, 0.0f);
@@ -297,8 +315,8 @@ int main(int argc, char *argv[])
 
     buttons.push_back(&fillbutton);
 
-    GUI_TEXT hello = GUI_TEXT("the quick brown fox", -0.5f, 0.0f, 0.05f, 0.05f);
-    GUI_TEXT hello2 = GUI_TEXT("jumped over the lazy dog", -0.5f, -0.05f, 0.05f, 0.05f);
+    // GUI_TEXT hello = GUI_TEXT("the quick brown fox", -0.5f, 0.0f, 0.05f, 0.05f);
+    // GUI_TEXT hello2 = GUI_TEXT("jumped over the lazy dog", -0.5f, -0.05f, 0.05f, 0.05f);
 
     //plotLine(ds, 0, 0, ds->canvas->width, ds->canvas->height, 0, 0, 0);
 
@@ -379,6 +397,12 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
+            } else if (strcmp(current_event->name, "input_text_click_event") == 0) {
+                if (cur_active_text_input == (GUI_INPUT_TEXT*)current_event->data) {
+                    cur_active_text_input = nullptr;
+                } else {
+                    cur_active_text_input = (GUI_INPUT_TEXT*)current_event->data;
+                }
             }
         }
 
@@ -408,8 +432,8 @@ int main(int argc, char *argv[])
         brushbutton.draw();
         linebutton.draw();
         fillbutton.draw();
-        hello.draw();
-        hello2.draw();
+        // hello.draw();
+        // hello2.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

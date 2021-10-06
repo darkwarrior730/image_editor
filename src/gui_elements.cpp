@@ -527,3 +527,35 @@ void GUI_TEXT::draw () {
         boxes[i]->draw();
     }
 }
+
+
+GUI_INPUT_TEXT::GUI_INPUT_TEXT(float x, float y, float w, float h, int r, int c) {
+    pos_x = x;
+    pos_y = y;
+    width = w;
+    height = h;
+
+    row = r;
+    column = c;
+}
+
+int GUI_INPUT_TEXT::checkCollide(double xpos, double ypos) {
+    int i = 1;
+
+    double temp_x = float(xpos);
+    double temp_y = float(ypos);
+
+    if ((temp_x < pos_x) || (temp_x > (pos_x + width))) {
+        i = 0;
+    }
+
+    if ((temp_y > pos_y) || (temp_y < (pos_y - height))) {
+        i = 0;
+    }
+
+    return i;
+}
+
+void GUI_INPUT_TEXT::add_character(int key) {
+    std::cout << key << std::endl;
+}
