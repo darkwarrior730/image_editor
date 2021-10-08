@@ -20,6 +20,10 @@
 int WIDTH = 640;
 int HEIGHT = 480;
 
+int do_a_thing = 0;
+
+BUTTON *b;
+
 void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -44,6 +48,16 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            ypos = HEIGHT - ypos;
+            xpos = float(xpos/WIDTH)*2.0f - 1.0f;
+            ypos = float(ypos/HEIGHT)*2.0f - 1.0f;
+            if (b->checkCollide(xpos, ypos) == true) {
+                b->changeState();
+            }
+        }
     }
 }
 
@@ -82,10 +96,14 @@ int main(int argc, char *argv[])
 
     BASE_BOX *box = new COLORED_BOX(-1.0f, 1.0f, 2.0f, 2.0f, color{0.5f, 0.2f, 1.0f, 1.0f});
     BASE_BOX *box2 = new TEXTURED_BOX(-0.5f, 0.5f, 1.0f, 1.0f, "pencil.jpg", 0.0f, 1.0f, 1.0f, 1.0f);
+    BASE_BOX *box3 = new TEXTURED_BOX(-0.5f, 0.5f, 1.0f, 1.0f, "pencil3.jpg", 0.0f, 1.0f, 1.0f, 1.0f);
+
+    BUTTON *but = new BUTTON(box2, box3);
+    b = but;
 
     while (!glfwWindowShouldClose(window)) {
         box->draw();
-        box2->draw();
+        but->draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

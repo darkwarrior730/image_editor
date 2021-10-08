@@ -41,10 +41,10 @@ private:
 public:
     BASE_BOX(float x, float y, float w, float h);
 
-    virtual void setX(float x);
-    virtual void setY(float y);
-    virtual void setWidth(float w);
-    virtual void setHeight(float h);
+    virtual bool setX(float x);
+    virtual bool setY(float y);
+    virtual bool setWidth(float w);
+    virtual bool setHeight(float h);
 
     virtual float getX();
     virtual float getY();
@@ -52,6 +52,8 @@ public:
     virtual float getHeight();
 
     virtual void draw();
+
+    virtual bool checkCollide(float x, float y);
 };
 
 class COLORED_BOX : public BASE_BOX {
@@ -70,15 +72,15 @@ private:
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
-    Shader shader = Shader("../src/vertex/test3.vs", "../src/fragment/test3.fs");
+    Shader shader = Shader("../src/vertex/newtest3.vs", "../src/fragment/newtest3.fs");
 
 public:
     COLORED_BOX(float x, float y, float w, float h, color c);
 
-    virtual void setX(float x) override;
-    virtual void setY(float y) override;
-    virtual void setWidth(float w) override;
-    virtual void setHeight(float h) override;
+    virtual bool setX(float x) override;
+    virtual bool setY(float y) override;
+    virtual bool setWidth(float w) override;
+    virtual bool setHeight(float h) override;
 
     void updateVertexBuffer();
 
@@ -104,15 +106,15 @@ private:
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
-    Shader shader = Shader("../src/vertex/test2.vs", "../src/fragment/test2.fs");
+    Shader shader = Shader("../src/vertex/newtest2.vs", "../src/fragment/newtest2.fs");
 
 public:
     TEXTURED_BOX(float x, float y, float w, float h, const char *pic, float u, float v, float uw, float vh);
 
-    virtual void setX(float x) override;
-    virtual void setY(float y) override;
-    virtual void setWidth(float w) override;
-    virtual void setHeight(float h) override;
+    virtual bool setX(float x) override;
+    virtual bool setY(float y) override;
+    virtual bool setWidth(float w) override;
+    virtual bool setHeight(float h) override;
 
     void updateVertexBuffer();
 
@@ -121,4 +123,31 @@ public:
     void setVertexTexCoord (int vert, float u, float v);
 
     virtual void draw() override;
+};
+
+class BUTTON {
+private:
+    BASE_BOX *up;
+    BASE_BOX *down;
+
+    enum state {DOWN, UP} state = DOWN;
+public:
+    BUTTON(BASE_BOX *u, BASE_BOX *d);
+
+    virtual void draw();
+
+    virtual bool checkCollide(float x, float y);
+
+    virtual int changeState();
+    virtual int getState();
+
+    virtual bool setX(float x);
+    virtual bool setY(float y);
+    virtual bool setWidth(float w);
+    virtual bool setHeight(float h);
+
+    virtual float getX();
+    virtual float getY();
+    virtual float getWidth();
+    virtual float getHeight();
 };

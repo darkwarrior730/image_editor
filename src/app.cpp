@@ -36,6 +36,8 @@ GUI_INPUT_TEXT *cur_active_text_input = nullptr;
 
 GUI_BOX *clicked = nullptr;
 
+// CHANGE EVENTS NAME FROM STRING TO ENUM
+
 typedef struct event{
     const char *name;
     void *data;

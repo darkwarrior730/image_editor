@@ -15,24 +15,28 @@ BASE_BOX::BASE_BOX(float x, float y, float w, float h) : x_pos{x}, y_pos{y}, wid
 {
 }
 
-void BASE_BOX::setX(float x)
+bool BASE_BOX::setX(float x)
 {
     x_pos = x;
+    return true;
 }
 
-void BASE_BOX::setY(float y)
+bool BASE_BOX::setY(float y)
 {
     y_pos = y;
+    return true;
 }
 
-void BASE_BOX::setWidth(float w)
+bool BASE_BOX::setWidth(float w)
 {
     width = w;
+    return true;
 }
 
-void BASE_BOX::setHeight(float h)
+bool BASE_BOX::setHeight(float h)
 {
     height = h;
+    return true;
 }
 
 float BASE_BOX::getX()
@@ -58,6 +62,18 @@ float BASE_BOX::getHeight()
 void BASE_BOX::draw()
 {
     return;
+}
+
+bool BASE_BOX::checkCollide(float x, float y)
+{
+    bool b = true;
+    if (x < x_pos || x > x_pos+width) {
+        b = false;
+    }
+    if (y > y_pos || y < y_pos-height) {
+        b = false;
+    }
+    return b;
 }
 
 
@@ -97,36 +113,58 @@ COLORED_BOX::COLORED_BOX(float x, float y, float w, float h, color c) : BASE_BOX
     }*/
 }
 
-void COLORED_BOX::setX(float x)
+bool COLORED_BOX::setX(float x)
 {
-    BASE_BOX::setX(x);
-    vertices[12] = x;
-    vertices[18] = x;
+    if (BASE_BOX::setX(x) == true) {
+        vertices[12] = x;
+        vertices[18] = x;
 
-    setWidth(BASE_BOX::getWidth());
+        if (setWidth(BASE_BOX::getWidth()) == true) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
-void COLORED_BOX::setY(float y)
+bool COLORED_BOX::setY(float y)
 {
-    BASE_BOX::setY(y);
-    vertices[1] = y;
-    vertices[19] = y;
+    if (BASE_BOX::setY(y) == true) {
+        vertices[1] = y;
+        vertices[19] = y;
 
-    setHeight(BASE_BOX::getHeight());
+        if (setHeight(BASE_BOX::getHeight()) == true) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
-void COLORED_BOX::setWidth(float w)
+bool COLORED_BOX::setWidth(float w)
 {
-    BASE_BOX::setWidth(w);
-    vertices[0] = BASE_BOX::getX() + w;
-    vertices[6] = BASE_BOX::getX() + w;
+    if (BASE_BOX::setWidth(w) == true) {
+        vertices[0] = BASE_BOX::getX() + w;
+        vertices[6] = BASE_BOX::getX() + w;
+        return true;
+    } else {
+        return false;
+    }
 }
 
-void COLORED_BOX::setHeight(float h)
+bool COLORED_BOX::setHeight(float h)
 {
-    BASE_BOX::setHeight(h);
-    vertices[7] = BASE_BOX::getY() - h;
-    vertices[13] = BASE_BOX::getY() - h;
+    if (BASE_BOX::setHeight(h) == true) {
+        vertices[7] = BASE_BOX::getY() - h;
+        vertices[13] = BASE_BOX::getY() - h;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void COLORED_BOX::updateVertexBuffer () {
@@ -204,36 +242,58 @@ TEXTURED_BOX::TEXTURED_BOX(float x, float y, float w, float h, const char *pic, 
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void TEXTURED_BOX::setX(float x)
+bool TEXTURED_BOX::setX(float x)
 {
-    BASE_BOX::setX(x);
-    vertices[10] = x;
-    vertices[15] = x;
+    if (BASE_BOX::setX(x) == true) {
+        vertices[10] = x;
+        vertices[15] = x;
 
-    setWidth(BASE_BOX::getWidth());
+        if (setWidth(BASE_BOX::getWidth()) == true) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
-void TEXTURED_BOX::setY(float y)
+bool TEXTURED_BOX::setY(float y)
 {
-    BASE_BOX::setY(y);
-    vertices[1] = y;
-    vertices[16] = y;
+    if (BASE_BOX::setY(y) == true) {
+        vertices[1] = y;
+        vertices[16] = y;
 
-    setHeight(BASE_BOX::getHeight());
+        if (setHeight(BASE_BOX::getHeight()) == true) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
-void TEXTURED_BOX::setWidth(float w)
+bool TEXTURED_BOX::setWidth(float w)
 {
-    BASE_BOX::setWidth(w);
-    vertices[0] = BASE_BOX::getX() + w;
-    vertices[5] = BASE_BOX::getX() + w;
+    if (BASE_BOX::setWidth(w) == true) {
+        vertices[0] = BASE_BOX::getX() + w;
+        vertices[5] = BASE_BOX::getX() + w;
+        return true;
+    } else {
+        return false;
+    }
 }
 
-void TEXTURED_BOX::setHeight(float h)
+bool TEXTURED_BOX::setHeight(float h)
 {
-    BASE_BOX::setHeight(h);
-    vertices[6] = BASE_BOX::getY() - h;
-    vertices[11] = BASE_BOX::getY() - h;
+    if (BASE_BOX::setHeight(h) == true) {
+        vertices[6] = BASE_BOX::getY() - h;
+        vertices[11] = BASE_BOX::getY() - h;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void TEXTURED_BOX::updateVertexBuffer () {
@@ -271,4 +331,94 @@ void TEXTURED_BOX::draw()
 void TEXTURED_BOX::setVertexTexCoord(int vert, float u, float v) {
     vertices[vert*5 + 3] = u;
     vertices[vert*5 + 4] = v;
+}
+
+
+BUTTON::BUTTON(BASE_BOX *u, BASE_BOX *d) : up{u}, down{d} 
+{
+}
+
+void BUTTON::draw()
+{
+    if (state == DOWN) {
+        down->draw();
+    } else if (state == UP) {
+        up->draw();
+    }
+}
+
+bool BUTTON::checkCollide(float x, float y)
+{
+    return down->checkCollide(x, y);
+}
+
+int BUTTON::changeState()
+{
+    if (state == DOWN) {
+        state = UP;
+    } else if (state == UP) {
+        state = DOWN;
+    }
+    return state;   
+}
+
+int BUTTON::getState()
+{
+    return state;
+}
+
+bool BUTTON::setX(float x)
+{
+    if (down->setX(x) == true && up->setX(x) == true) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool BUTTON::setY(float y)
+{
+    if (down->setY(y) == true && up->setY(y) == true) {
+        return true;
+    } else {
+        return false;
+    }   
+}
+
+bool BUTTON::setWidth(float w)
+{
+    if (down->setWidth(w) == true && up->setWidth(w) == true) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool BUTTON::setHeight(float h)
+{
+    if (down->setHeight(h) == true && up->setHeight(h) == true) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+float BUTTON::getX()
+{
+    return down->getX();
+}
+
+float BUTTON::getY()
+{
+    return down->getY();
+}
+
+float BUTTON::getWidth()
+{
+    return down->getWidth();
+}
+
+float BUTTON::getHeight()
+{
+    return down->getHeight();
 }
